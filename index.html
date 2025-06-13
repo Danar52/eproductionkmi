@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Data Produksi</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, select { width: 100%; padding: 8px; margin-top: 4px; }
+    button { margin-top: 20px; padding: 10px; background-color: green; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Form Input Produksi</h2>
+  <form id="produksiForm">
+    <label>Tanggal:
+      <input type="date" name="Tanggal" id="tanggal" required>
+    </label>
+
+    <label>Customer:
+      <select name="Customer" id="customer" required>
+        <option value="">--Pilih Customer--</option>
+        <option value="Toyota">Toyota</option>
+        <option value="Honda">Honda</option>
+        <option value="Suzuki">Suzuki</option>
+      </select>
+    </label>
+
+    <label>Part Name:
+      <select name="Part Name" id="partName" required>
+        <option value="">--Pilih Part--</option>
+      </select>
+    </label>
+
+    <label>Part Number:
+      <input type="text" name="Part Number" id="partNumber" readonly>
+    </label>
+
+    <label>Status:
+      <select name="Status" required>
+        <option value="Material">Material</option>
+        <option value="WIP">WIP</option>
+        <option value="Finish Good">Finish Good</option>
+        <option value="NG">NG</option>
+      </select>
+    </label>
+
+    <label>Jumlah:
+      <input type="number" name="Jumlah" required>
+    </label>
+
+    <label>Satuan:
+      <select name="Satuan" required>
+        <option value="Pcs">Pcs</option>
+        <option value="Set">Set</option>
+        <option value="Kg">Kg</option>
+      </select>
+    </label>
+
+    <label>Departemen:
+      <select name="Departemen" required>
+        <option value="Produksi">Produksi</option>
+        <option value="PPIC">PPIC</option>
+        <option value="Quality">Quality</option>
+      </select>
+    </label>
+
+    <button type="submit">Kirim</button>
+  </form>
+
+  <p id="pesan"></p>
+
+  <script>
+    const form = document.getElementById('produksiForm');
+    const pesan = document.getElementById('pesan');
+
+    // Tanggal: nonaktifkan tanggal sebelumnya
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("tanggal").setAttribute("min", today);
+
+    // Dropdown dinamis Part Name berdasarkan Customer
+    const partList = {
+      Toyota: [{ name: "Handle", number: "TY001" }, { name: "Bumper", number: "TY002" }],
+      Honda: [{ name: "Knalpot", number: "HN001" }, { name: "Spion", number: "HN002" }],
+      Suzuki: [{ name: "Rangka", number: "SZ001" }, { name: "Velg", number: "SZ002" }]
+    };
+
+    const customerEl = document.getElementById("customer");
+    const partNameEl = document.getElementById("partName");
+    const partNumberEl = document.getElementById("partNumber");
+
+    customerEl.addEventListener("change", function () {
+      const selectedCustomer = customerEl.value;
+      partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
+      if (partList[selectedCustomer]) {
+        partList[selectedCustomer].forEach(part => {
+          const option = document.createElement("option");
+          option.value = part.name;
+          option.textContent = part.name;
+          partNameEl.appendChild(option);
+        });
+      }
+    });
+
+    partNameEl.addEventListener("change", function () {
+      const selectedPart = partList[customerEl.value]?.find(p => p.name === partNameEl.value);
+      partNumberEl.value = selectedPart ? selectedPart.number : "";
+    });
+
+    // Kirim data ke Sheet.best
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      data.Timestamp = new Date().toISOString();
+
+      try {
+        const res = await fetch("https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          pesan.textContent = "Data berhasil dikirim!";
+          form.reset();
+        } else {
+          pesan.textContent = "Gagal mengirim data.";
+        }
+      } catch (err) {
+        console.error(err);
+        pesan.textContent = "Terjadi kesalahan.";
+      }
+    });
+  </script>
+</body>
+</html>

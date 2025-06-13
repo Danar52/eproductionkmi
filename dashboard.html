@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Produksi</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
+    th { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h2>Dashboard Data Produksi</h2>
+  <table id="tabelProduksi">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Tanggal</th>
+        <th>Customer</th>
+        <th>Part Name</th>
+        <th>Part Number</th>
+        <th>Status</th>
+        <th>Jumlah</th>
+        <th>Satuan</th>
+        <th>Departemen</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const url = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+
+    async function fetchData() {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const tbody = document.querySelector("#tabelProduksi tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+            <td>${row.Timestamp || ""}</td>
+            <td>${row.Tanggal || ""}</td>
+            <td>${row.Customer || ""}</td>
+            <td>${row["Part Name"] || ""}</td>
+            <td>${row["Part Number"] || ""}</td>
+            <td>${row.Status || ""}</td>
+            <td>${row.Jumlah || ""}</td>
+            <td>${row.Satuan || ""}</td>
+            <td>${row.Departemen || ""}</td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error("Gagal mengambil data:", error);
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 10000); // auto-refresh tiap 10 detik
+  </script>
+</body>
+</html>
