@@ -99,7 +99,7 @@
       width: 100%;
       padding: 15px;
       border: 1px solid var(--border-color);
-      border-radius: var(--border-radius-md);
+      border-radius: var(--border-radius-soft); /* Changed to soft for consistency */
       font-size: 1rem;
       color: var(--text-dark);
       background-color: var(--card-bg);
@@ -140,7 +140,7 @@
       flex: 1;
       padding: 15px 20px;
       border: none;
-      border-radius: var(--border-radius-md);
+      border-radius: var(--border-radius-soft); /* Changed to soft for consistency */
       font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
@@ -179,8 +179,6 @@
       transform: translateY(-2px);
       box-shadow: var(--shadow-elevation-2);
     }
-
-    /* #pesan styling removed - as it will be removed from HTML */
 
     /* --- Overlay and Spinner --- */
     #overlay {
@@ -262,6 +260,16 @@
       to { opacity: 0; transform: translate(-50%, -50px); }
     }
 
+    /* Styles for the new copyright section */
+    .copyright {
+      text-align: center;
+      margin-top: 25px;
+      padding: 15px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+
     /* --- Responsive Adjustments --- */
     @media (max-width: 768px) {
         .container {
@@ -269,6 +277,10 @@
         }
         h2 {
             font-size: 1.7rem;
+        }
+        .copyright {
+            padding: 10px;
+            font-size: 0.8rem;
         }
     }
 
@@ -329,8 +341,6 @@
       .button-group i {
         margin-right: 8px;
       }
-
-      /* #pesan styling removed for mobile as well */
 
       .spinner {
         width: 50px;
@@ -420,7 +430,12 @@
       </div>
     </form>
 
+    <!-- New Copyright Section - Moved inside .container -->
+    <div class="copyright">
+      <p>&copy; 2025 Form Input Produksi. <b>PT. Kenco Manufactur Indonesia</b>.</p>
     </div>
+
+  </div>
 
   <div id="overlay">
     <div class="spinner"></div>
@@ -433,7 +448,6 @@
 
   <script>
     const form = document.getElementById('produksiForm');
-    // const pesan = document.getElementById('pesan'); // This element is removed
     const overlay = document.getElementById('overlay');
     const popupNotification = document.getElementById('popupNotification');
 
