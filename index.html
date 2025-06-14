@@ -15,7 +15,7 @@
     }
 
     .container {
-      max-width: 500px;
+      max-width: 600px;
       margin: auto;
       background: #fff;
       padding: 25px 30px;
@@ -41,17 +41,10 @@
       margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 10px;
-      transition: border-color 0.3s ease;
-    }
-
-    input:focus, select:focus {
-      border-color: #4caf50;
-      outline: none;
     }
 
     input[readonly] {
       background-color: #f0f0f0;
-      color: #555;
       cursor: not-allowed;
     }
 
@@ -62,8 +55,7 @@
       margin-top: 10px;
     }
 
-    .button-group button,
-    .button-group a {
+    button, a {
       flex: 1;
       padding: 10px;
       border: none;
@@ -81,18 +73,13 @@
     }
 
     .submit-btn:hover {
-      background-color: #43a047;
+      background-color: #388e3c;
     }
 
     .dashboard-btn {
       background-color: #1976d2;
       color: white;
       text-decoration: none;
-      line-height: 34px;
-    }
-
-    .dashboard-btn:hover {
-      background-color: #1565c0;
     }
 
     #pesan {
@@ -105,11 +92,10 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(255,255,255,0.7);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 999;
-      display: none;
     }
 
     .spinner {
@@ -124,60 +110,44 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-
-    @media (max-width: 600px) {
-      .button-group {
-        flex-direction: column;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Input Data Produksi</h2>
+    <h2>Form Input Produksi</h2>
     <form id="produksiForm">
       <label for="tanggal">Tanggal</label>
       <input type="text" name="Tanggal" id="tanggal" readonly required />
 
       <label for="customer">Customer</label>
       <select name="Customer" id="customer" required>
-        <option value="">--Pilih Customer--</option>
-        <option value="Toyota">Toyota</option>
-        <option value="Honda">Honda</option>
-        <option value="Suzuki">Suzuki</option>
+        <option value="">-- Pilih Customer --</option>
       </select>
 
       <label for="partName">Part Name</label>
       <select name="Part Name" id="partName" required>
-        <option value="">--Pilih Part--</option>
+        <option value="">-- Pilih Part --</option>
       </select>
 
       <label for="partNumber">Part Number</label>
       <input type="text" name="Part Number" id="partNumber" readonly />
 
       <label for="status">Status</label>
-      <select name="Status" required>
-        <option value="Material">Material</option>
-        <option value="WIP">WIP</option>
-        <option value="Finish Good">Finish Good</option>
-        <option value="NG">NG</option>
+      <select name="Status" id="status" required>
+        <option value="">-- Pilih Status --</option>
       </select>
 
       <label for="jumlah">Jumlah</label>
       <input type="number" name="Jumlah" required />
 
       <label for="satuan">Satuan</label>
-      <select name="Satuan" required>
-        <option value="Pcs">Pcs</option>
-        <option value="Set">Set</option>
-        <option value="Kg">Kg</option>
+      <select name="Satuan" id="satuan" required>
+        <option value="">-- Pilih Satuan --</option>
       </select>
 
       <label for="departement">Departement</label>
-      <select name="Departement" required>
-        <option value="Produksi">Produksi</option>
-        <option value="PPIC">PPIC</option>
-        <option value="Quality">Quality</option>
+      <select name="Departement" id="departement" required>
+        <option value="">-- Pilih Departement --</option>
       </select>
 
       <div class="button-group">
@@ -185,7 +155,6 @@
         <a href="dashboard.html" class="dashboard-btn">Lihat Dashboard</a>
       </div>
     </form>
-
     <p id="pesan"></p>
   </div>
 
@@ -194,47 +163,86 @@
   </div>
 
   <script>
-    const form = document.getElementById('produksiForm');
-    const pesan = document.getElementById('pesan');
-    const overlay = document.getElementById('overlay');
-
-    // Set tanggal hari ini otomatis (YYYY-MM-DD)
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const todayString = `${year}-${month}-${day}`;
-    document.getElementById("tanggal").value = todayString;
-
-    // Dropdown dinamis
-    const partList = {
-      Toyota: [{ name: "Handle", number: "TY001" }, { name: "Bumper", number: "TY002" }],
-      Honda: [{ name: "Knalpot", number: "HN001" }, { name: "Spion", number: "HN002" }],
-      Suzuki: [{ name: "Rangka", number: "SZ001" }, { name: "Velg", number: "SZ002" }]
-    };
+    const API_BASE = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("tanggal").value = today;
 
     const customerEl = document.getElementById("customer");
     const partNameEl = document.getElementById("partName");
     const partNumberEl = document.getElementById("partNumber");
 
-    customerEl.addEventListener("change", () => {
-      const selectedCustomer = customerEl.value;
-      partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
-      if (partList[selectedCustomer]) {
-        partList[selectedCustomer].forEach(part => {
-          const option = document.createElement("option");
-          option.value = part.name;
-          option.textContent = part.name;
-          partNameEl.appendChild(option);
-        });
-      }
-      partNumberEl.value = "";
-    });
+    async function fetchData(sheetName) {
+      const res = await fetch(`${API_BASE}/${sheetName}`);
+      return await res.json();
+    }
 
-    partNameEl.addEventListener("change", () => {
-      const selectedPart = partList[customerEl.value]?.find(p => p.name === partNameEl.value);
-      partNumberEl.value = selectedPart ? selectedPart.number : "";
-    });
+    async function loadMasterData() {
+      const [customers, parts, status, departement, satuan] = await Promise.all([
+        fetchData("CUSTOMER"),
+        fetchData("PART"),
+        fetchData("STATUS"),
+        fetchData("DEPARTEMENT"),
+        fetchData("SATUAN")
+      ]);
+
+      // Populate customer dropdown
+      customers.forEach(row => {
+        const opt = document.createElement("option");
+        opt.value = row.Customer;
+        opt.textContent = row.Customer;
+        customerEl.appendChild(opt);
+      });
+
+      // Populate status, satuan, departement
+      status.forEach(row => {
+        const opt = document.createElement("option");
+        opt.value = row.Status;
+        opt.textContent = row.Status;
+        document.getElementById("status").appendChild(opt);
+      });
+
+      satuan.forEach(row => {
+        const opt = document.createElement("option");
+        opt.value = row.Satuan;
+        opt.textContent = row.Satuan;
+        document.getElementById("satuan").appendChild(opt);
+      });
+
+      departement.forEach(row => {
+        const opt = document.createElement("option");
+        opt.value = row.Departement;
+        opt.textContent = row.Departement;
+        document.getElementById("departement").appendChild(opt);
+      });
+
+      // Event: saat customer dipilih
+      customerEl.addEventListener("change", () => {
+        const selected = customerEl.value;
+        partNameEl.innerHTML = '<option value="">-- Pilih Part --</option>';
+        parts.filter(p => p.Customer === selected).forEach(part => {
+          const opt = document.createElement("option");
+          opt.value = part["Part Name"];
+          opt.textContent = part["Part Name"];
+          partNameEl.appendChild(opt);
+        });
+        partNumberEl.value = "";
+      });
+
+      // Event: saat part name dipilih
+      partNameEl.addEventListener("change", () => {
+        const selectedPart = partNameEl.value;
+        const selectedCustomer = customerEl.value;
+        const found = parts.find(p => p.Customer === selectedCustomer && p["Part Name"] === selectedPart);
+        partNumberEl.value = found ? found["Part No."] : "";
+      });
+    }
+
+    loadMasterData();
+
+    // Handle form submission
+    const form = document.getElementById("produksiForm");
+    const overlay = document.getElementById("overlay");
+    const pesan = document.getElementById("pesan");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -246,7 +254,7 @@
       data.Timestamp = new Date().toISOString();
 
       try {
-        const res = await fetch("https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249", {
+        const res = await fetch(API_BASE, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
@@ -255,9 +263,9 @@
         if (res.ok) {
           pesan.textContent = "✅ Data berhasil dikirim!";
           form.reset();
-          partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
+          partNameEl.innerHTML = '<option value="">-- Pilih Part --</option>';
           partNumberEl.value = "";
-          document.getElementById("tanggal").value = todayString;
+          document.getElementById("tanggal").value = today;
         } else {
           pesan.textContent = "❌ Gagal mengirim data.";
         }

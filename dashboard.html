@@ -3,268 +3,176 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Produksi</title>
+  <title>Dashboard Produksi - Filter</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f1f3f5;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
       margin: 0;
       padding: 20px;
     }
-
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
     h2 {
       text-align: center;
-      color: #212529;
       margin-bottom: 20px;
     }
-
-    .dashboard-container {
-      max-width: 100%;
-      margin: auto;
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .button-row {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .button-row a {
-      padding: 10px 16px;
-      background-color: #198754;
-      color: white;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 14px;
-      transition: 0.2s ease-in-out;
-    }
-
-    .button-row a:hover {
-      background-color: #146c43;
-    }
-
-    .filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .filter-row input,
-    .filter-row select,
-    .filter-row button {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #ced4da;
-      font-size: 14px;
-    }
-
-    .filter-row input[type="text"],
-    .filter-row select {
-      width: 160px;
-    }
-
-    .filter-row button {
-      background-color: #0d6efd;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .filter-row button:hover {
-      background-color: #0b5ed7;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-      margin-top: 15px;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 800px;
     }
-
-    th, td {
+    table thead {
+      background-color: #4caf50;
+      color: white;
+    }
+    table th, table td {
       padding: 10px;
-      border: 1px solid #dee2e6;
       text-align: center;
-      font-size: 14px;
+      border: 1px solid #ccc;
     }
-
-    th {
-      background-color: #e9ecef;
-      color: #212529;
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
     }
-
-    .spinner {
+    .filters {
       display: flex;
-      justify-content: center;
-      margin-top: 30px;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
-
-    .spinner div {
-      width: 12px;
-      height: 12px;
-      margin: 3px;
-      background: #198754;
-      border-radius: 50%;
-      animation: bounce 0.6s infinite alternate;
-    }
-
-    .spinner div:nth-child(2) { animation-delay: 0.2s; }
-    .spinner div:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes bounce {
-      to {
-        opacity: 0.3;
-        transform: translateY(-10px);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .filter-row input,
-      .filter-row select,
-      .filter-row button {
-        font-size: 12px;
-        padding: 6px 10px;
-      }
-
-      .button-row a {
-        font-size: 12px;
-        padding: 8px 12px;
-      }
-
-      th, td {
-        font-size: 12px;
-        padding: 8px 6px;
-      }
+    .filters input, .filters select {
+      padding: 8px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div class="dashboard-container">
+  <div class="container">
     <h2>Dashboard Data Produksi</h2>
-
-    <div class="button-row">
-      <a href="index.html">+ Input Data</a>
-      <div class="filter-row">
-        <input type="date" id="filterTanggal" />
-        <input type="text" id="filterPartName" placeholder="Cari Part Name..." oninput="fetchData()" />
-        <select id="filterStatus" onchange="fetchData()">
-          <option value="">-- Semua Status --</option>
-          <option value="Material">Material</option>
-          <option value="WIP">WIP</option>
-          <option value="Finish Good">Finish Good</option>
-          <option value="NG">NG</option>
-        </select>
-        <button onclick="fetchData()">Terapkan Filter</button>
-      </div>
+    <div class="filters">
+      <input type="date" id="filterTanggal">
+      <select id="filterCustomer">
+        <option value="">Pilih Customer</option>
+      </select>
+      <select id="filterPartName">
+        <option value="">Pilih Part Name</option>
+      </select>
+      <select id="filterStatus">
+        <option value="">Pilih Status</option>
+      </select>
     </div>
-
-    <div class="spinner" id="loadingSpinner">
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
-
-    <div class="table-wrapper">
-      <table id="tabelProduksi" style="display:none;">
-        <thead>
-          <tr>
-            <th>Tanggal</th>
-            <th>Customer</th>
-            <th>Part Name</th>
-            <th>Part Number</th>
-            <th>Status</th>
-            <th>Jumlah</th>
-            <th>Satuan</th>
-            <th>Departement</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div id="loading">⏳ Memuat data...</div>
+    <table id="dataTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Customer</th>
+          <th>Part Name</th>
+          <th>Part No.</th>
+          <th>Status</th>
+          <th>Jumlah</th>
+          <th>Satuan</th>
+          <th>Departement</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
   </div>
 
   <script>
-    const url = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+    const apiURL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+    let allData = [];
 
-    function convertExcelDate(serial) {
-      const excelEpoch = new Date(1899, 11, 30);
-      const date = new Date(excelEpoch.getTime() + serial * 86400000);
-      return date.toISOString().split('T')[0];
-    }
+    const tableBody = document.getElementById("tableBody");
+    const loadingText = document.getElementById("loading");
+    const dataTable = document.getElementById("dataTable");
+
+    const filterTanggal = document.getElementById("filterTanggal");
+    const filterCustomer = document.getElementById("filterCustomer");
+    const filterPartName = document.getElementById("filterPartName");
+    const filterStatus = document.getElementById("filterStatus");
 
     async function fetchData() {
-      const spinner = document.getElementById("loadingSpinner");
-      const table = document.getElementById("tabelProduksi");
-      const tbody = table.querySelector("tbody");
-
-      const filterTanggal = document.getElementById("filterTanggal").value;
-      const filterPartName = document.getElementById("filterPartName").value.toLowerCase();
-      const filterStatus = document.getElementById("filterStatus").value;
-
-      spinner.style.display = "flex";
-      table.style.display = "none";
-      tbody.innerHTML = "";
-
       try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        const filteredData = data.filter(row => {
-          let tanggal = row.Tanggal;
-          if (!isNaN(tanggal)) tanggal = convertExcelDate(Number(tanggal));
-          else if (tanggal.includes("/")) {
-            const [d, m, y] = tanggal.split("/");
-            tanggal = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-          }
-
-          const matchTanggal = !filterTanggal || tanggal === filterTanggal;
-          const matchPart = !filterPartName || (row["Part Name"] || "").toLowerCase().includes(filterPartName);
-          const matchStatus = !filterStatus || row.Status === filterStatus;
-
-          return matchTanggal && matchPart && matchStatus;
-        });
-
-        if (filteredData.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8">Tidak ada data ditemukan.</td></tr>`;
-        } else {
-          filteredData.forEach(row => {
-            const tr = document.createElement("tr");
-            const tanggal = !isNaN(row.Tanggal) ? convertExcelDate(Number(row.Tanggal)) : row.Tanggal;
-
-            tr.innerHTML = `
-              <td>${tanggal}</td>
-              <td>${row.Customer || ""}</td>
-              <td>${row["Part Name"] || ""}</td>
-              <td>${row["Part Number"] || ""}</td>
-              <td>${row.Status || ""}</td>
-              <td>${row.Jumlah || ""}</td>
-              <td>${row.Satuan || ""}</td>
-              <td>${row.Departement || ""}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        }
-
-        spinner.style.display = "none";
-        table.style.display = "table";
+        const res = await fetch(apiURL);
+        const data = await res.json();
+        allData = data.reverse();
+        populateFilters(allData);
+        renderTable(allData);
       } catch (error) {
-        console.error("Gagal mengambil data:", error);
-        spinner.innerHTML = "<p>Gagal mengambil data.</p>";
+        loadingText.textContent = "❌ Gagal memuat data.";
+        console.error(error);
       }
     }
 
-    // Load semua data tanpa filter saat halaman dibuka
-    document.addEventListener("DOMContentLoaded", fetchData);
+    function populateFilters(data) {
+      const customers = new Set();
+      const partNames = new Set();
+      const statuses = new Set();
+
+      data.forEach(item => {
+        if (item.Customer) customers.add(item.Customer);
+        if (item["Part Name"]) partNames.add(item["Part Name"]);
+        if (item.Status) statuses.add(item.Status);
+      });
+
+      for (const val of customers) filterCustomer.innerHTML += `<option value="${val}">${val}</option>`;
+      for (const val of partNames) filterPartName.innerHTML += `<option value="${val}">${val}</option>`;
+      for (const val of statuses) filterStatus.innerHTML += `<option value="${val}">${val}</option>`;
+
+      loadingText.style.display = "none";
+      dataTable.style.display = "table";
+    }
+
+    function renderTable(data) {
+      tableBody.innerHTML = "";
+      data.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.Tanggal || ''}</td>
+          <td>${item.Customer || ''}</td>
+          <td>${item["Part Name"] || ''}</td>
+          <td>${item["Part Number"] || ''}</td>
+          <td>${item.Status || ''}</td>
+          <td>${item.Jumlah || ''}</td>
+          <td>${item.Satuan || ''}</td>
+          <td>${item.Departement || ''}</td>
+          <td>${item.Timestamp ? new Date(item.Timestamp).toLocaleString() : ''}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function applyFilters() {
+      const tanggal = filterTanggal.value;
+      const customer = filterCustomer.value;
+      const partName = filterPartName.value;
+      const status = filterStatus.value;
+
+      const filtered = allData.filter(item => {
+        return (
+          (!tanggal || item.Tanggal === tanggal) &&
+          (!customer || item.Customer === customer) &&
+          (!partName || item["Part Name"] === partName) &&
+          (!status || item.Status === status)
+        );
+      });
+
+      renderTable(filtered);
+    }
+
+    filterTanggal.addEventListener("change", applyFilters);
+    filterCustomer.addEventListener("change", applyFilters);
+    filterPartName.addEventListener("change", applyFilters);
+    filterStatus.addEventListener("change", applyFilters);
+
+    fetchData();
   </script>
 </body>
 </html>
