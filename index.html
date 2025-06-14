@@ -15,7 +15,7 @@
     }
 
     .container {
-      max-width: 600px;
+      max-width: 500px;
       margin: auto;
       background: #fff;
       padding: 25px 30px;
@@ -41,10 +41,17 @@
       margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 10px;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #4caf50;
+      outline: none;
     }
 
     input[readonly] {
       background-color: #f0f0f0;
+      color: #555;
       cursor: not-allowed;
     }
 
@@ -55,7 +62,8 @@
       margin-top: 10px;
     }
 
-    button, a {
+    .button-group button,
+    .button-group a {
       flex: 1;
       padding: 10px;
       border: none;
@@ -73,13 +81,18 @@
     }
 
     .submit-btn:hover {
-      background-color: #388e3c;
+      background-color: #43a047;
     }
 
     .dashboard-btn {
       background-color: #1976d2;
       color: white;
       text-decoration: none;
+      line-height: 34px;
+    }
+
+    .dashboard-btn:hover {
+      background-color: #1565c0;
     }
 
     #pesan {
@@ -92,10 +105,11 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(255,255,255,0.7);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       z-index: 999;
+      display: none;
     }
 
     .spinner {
@@ -110,44 +124,50 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    @media (max-width: 600px) {
+      .button-group {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Form Input Produksi</h2>
+    <h2>Input Data Produksi</h2>
     <form id="produksiForm">
       <label for="tanggal">Tanggal</label>
       <input type="text" name="Tanggal" id="tanggal" readonly required />
 
       <label for="customer">Customer</label>
       <select name="Customer" id="customer" required>
-        <option value="">-- Pilih Customer --</option>
+        <option value="">--Pilih Customer--</option>
       </select>
 
       <label for="partName">Part Name</label>
       <select name="Part Name" id="partName" required>
-        <option value="">-- Pilih Part --</option>
+        <option value="">--Pilih Part--</option>
       </select>
 
       <label for="partNumber">Part Number</label>
       <input type="text" name="Part Number" id="partNumber" readonly />
 
       <label for="status">Status</label>
-      <select name="Status" id="status" required>
-        <option value="">-- Pilih Status --</option>
+      <select name="Status" required>
+        <option value="">--Pilih Status--</option>
       </select>
 
       <label for="jumlah">Jumlah</label>
       <input type="number" name="Jumlah" required />
 
       <label for="satuan">Satuan</label>
-      <select name="Satuan" id="satuan" required>
-        <option value="">-- Pilih Satuan --</option>
+      <select name="Satuan" required>
+        <option value="">--Pilih Satuan--</option>
       </select>
 
       <label for="departement">Departement</label>
-      <select name="Departement" id="departement" required>
-        <option value="">-- Pilih Departement --</option>
+      <select name="Departement" required>
+        <option value="">--Pilih Departement--</option>
       </select>
 
       <div class="button-group">
@@ -155,6 +175,7 @@
         <a href="dashboard.html" class="dashboard-btn">Lihat Dashboard</a>
       </div>
     </form>
+
     <p id="pesan"></p>
   </div>
 
@@ -163,86 +184,96 @@
   </div>
 
   <script>
-    const API_BASE = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("tanggal").value = today;
+    const form = document.getElementById('produksiForm');
+    const pesan = document.getElementById('pesan');
+    const overlay = document.getElementById('overlay');
 
     const customerEl = document.getElementById("customer");
     const partNameEl = document.getElementById("partName");
     const partNumberEl = document.getElementById("partNumber");
 
-    async function fetchData(sheetName) {
-      const res = await fetch(`${API_BASE}/${sheetName}`);
-      return await res.json();
+    const partList = {};
+
+    // Set tanggal hari ini
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayString = `${yyyy}-${mm}-${dd}`;
+    document.getElementById("tanggal").value = todayString;
+
+    // Ambil data master
+    async function fetchMasterData() {
+      try {
+        const [customerData, partData, statusData, satuanData, departementData] = await Promise.all([
+          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/CUSTOMER').then(res => res.json()),
+          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/PART').then(res => res.json()),
+          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/STATUS').then(res => res.json()),
+          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/SATUAN').then(res => res.json()),
+          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/DEPARTEMENT').then(res => res.json()),
+        ]);
+
+        customerData.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c.Customer;
+          opt.textContent = c.Customer;
+          customerEl.appendChild(opt);
+        });
+
+        partData.forEach(p => {
+          if (!partList[p.Customer]) partList[p.Customer] = [];
+          partList[p.Customer].push({ name: p["Part Name"], number: p["Part No."] });
+        });
+
+        statusData.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s.Status;
+          opt.textContent = s.Status;
+          document.querySelector('select[name="Status"]').appendChild(opt);
+        });
+
+        satuanData.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s.Satuan;
+          opt.textContent = s.Satuan;
+          document.querySelector('select[name="Satuan"]').appendChild(opt);
+        });
+
+        departementData.forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d.Departement;
+          opt.textContent = d.Departement;
+          document.querySelector('select[name="Departement"]').appendChild(opt);
+        });
+      } catch (err) {
+        console.error("Gagal ambil master:", err);
+        pesan.textContent = "⚠️ Gagal ambil master data.";
+      }
     }
 
-    async function loadMasterData() {
-      const [customers, parts, status, departement, satuan] = await Promise.all([
-        fetchData("CUSTOMER"),
-        fetchData("PART"),
-        fetchData("STATUS"),
-        fetchData("DEPARTEMENT"),
-        fetchData("SATUAN")
-      ]);
+    fetchMasterData();
 
-      // Populate customer dropdown
-      customers.forEach(row => {
-        const opt = document.createElement("option");
-        opt.value = row.Customer;
-        opt.textContent = row.Customer;
-        customerEl.appendChild(opt);
-      });
+    customerEl.addEventListener("change", () => {
+      const selectedCustomer = customerEl.value;
+      partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
+      partNumberEl.value = "";
 
-      // Populate status, satuan, departement
-      status.forEach(row => {
-        const opt = document.createElement("option");
-        opt.value = row.Status;
-        opt.textContent = row.Status;
-        document.getElementById("status").appendChild(opt);
-      });
-
-      satuan.forEach(row => {
-        const opt = document.createElement("option");
-        opt.value = row.Satuan;
-        opt.textContent = row.Satuan;
-        document.getElementById("satuan").appendChild(opt);
-      });
-
-      departement.forEach(row => {
-        const opt = document.createElement("option");
-        opt.value = row.Departement;
-        opt.textContent = row.Departement;
-        document.getElementById("departement").appendChild(opt);
-      });
-
-      // Event: saat customer dipilih
-      customerEl.addEventListener("change", () => {
-        const selected = customerEl.value;
-        partNameEl.innerHTML = '<option value="">-- Pilih Part --</option>';
-        parts.filter(p => p.Customer === selected).forEach(part => {
+      if (partList[selectedCustomer]) {
+        partList[selectedCustomer].forEach(part => {
           const opt = document.createElement("option");
-          opt.value = part["Part Name"];
-          opt.textContent = part["Part Name"];
+          opt.value = part.name;
+          opt.textContent = part.name;
           partNameEl.appendChild(opt);
         });
-        partNumberEl.value = "";
-      });
+      }
+    });
 
-      // Event: saat part name dipilih
-      partNameEl.addEventListener("change", () => {
-        const selectedPart = partNameEl.value;
-        const selectedCustomer = customerEl.value;
-        const found = parts.find(p => p.Customer === selectedCustomer && p["Part Name"] === selectedPart);
-        partNumberEl.value = found ? found["Part No."] : "";
-      });
-    }
-
-    loadMasterData();
-
-    // Handle form submission
-    const form = document.getElementById("produksiForm");
-    const overlay = document.getElementById("overlay");
-    const pesan = document.getElementById("pesan");
+    partNameEl.addEventListener("change", () => {
+      const selectedCustomer = customerEl.value;
+      const selectedPartName = partNameEl.value;
+      const part = partList[selectedCustomer]?.find(p => p.name === selectedPartName);
+      partNumberEl.value = part ? part.number : "";
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -254,7 +285,7 @@
       data.Timestamp = new Date().toISOString();
 
       try {
-        const res = await fetch(API_BASE, {
+        const res = await fetch("https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
@@ -263,9 +294,9 @@
         if (res.ok) {
           pesan.textContent = "✅ Data berhasil dikirim!";
           form.reset();
-          partNameEl.innerHTML = '<option value="">-- Pilih Part --</option>';
+          document.getElementById("tanggal").value = todayString;
+          partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
           partNumberEl.value = "";
-          document.getElementById("tanggal").value = today;
         } else {
           pesan.textContent = "❌ Gagal mengirim data.";
         }
