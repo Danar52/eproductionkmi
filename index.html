@@ -1,85 +1,204 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Input Data Produksi</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Form Input Produksi</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    label { display: block; margin-top: 10px; }
-    input, select { width: 100%; padding: 8px; margin-top: 4px; }
-    button { margin-top: 20px; padding: 10px; background-color: green; color: white; border: none; cursor: pointer; }
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #4caf50;
+      outline: none;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .button-group button,
+    .button-group a {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .submit-btn {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .submit-btn:hover {
+      background-color: #43a047;
+    }
+
+    .dashboard-btn {
+      background-color: #1976d2;
+      color: white;
+      text-decoration: none;
+      line-height: 34px;
+    }
+
+    .dashboard-btn:hover {
+      background-color: #1565c0;
+    }
+
+    #pesan {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* Spinner Overlay */
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      display: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 6px solid #e0e0e0;
+      border-top: 6px solid #4caf50;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .button-group {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>Form Input Produksi</h2>
-  <form id="produksiForm">
-    <label>Tanggal:
-      <input type="date" name="Tanggal" id="tanggal" required>
-    </label>
+  <div class="container">
+    <h2>Input Data Produksi</h2>
+    <form id="produksiForm">
+      <label for="tanggal">Tanggal</label>
+      <input type="date" name="Tanggal" id="tanggal" required />
 
-    <label>Customer:
+      <label for="customer">Customer</label>
       <select name="Customer" id="customer" required>
         <option value="">--Pilih Customer--</option>
         <option value="Toyota">Toyota</option>
         <option value="Honda">Honda</option>
         <option value="Suzuki">Suzuki</option>
       </select>
-    </label>
 
-    <label>Part Name:
+      <label for="partName">Part Name</label>
       <select name="Part Name" id="partName" required>
         <option value="">--Pilih Part--</option>
       </select>
-    </label>
 
-    <label>Part Number:
-      <input type="text" name="Part Number" id="partNumber" readonly>
-    </label>
+      <label for="partNumber">Part Number</label>
+      <input type="text" name="Part Number" id="partNumber" readonly />
 
-    <label>Status:
+      <label for="status">Status</label>
       <select name="Status" required>
         <option value="Material">Material</option>
         <option value="WIP">WIP</option>
         <option value="Finish Good">Finish Good</option>
         <option value="NG">NG</option>
       </select>
-    </label>
 
-    <label>Jumlah:
-      <input type="number" name="Jumlah" required>
-    </label>
+      <label for="jumlah">Jumlah</label>
+      <input type="number" name="Jumlah" required />
 
-    <label>Satuan:
+      <label for="satuan">Satuan</label>
       <select name="Satuan" required>
         <option value="Pcs">Pcs</option>
         <option value="Set">Set</option>
         <option value="Kg">Kg</option>
       </select>
-    </label>
 
-    <label>Departemen:
-      <select name="Departemen" required>
+      <label for="departement">Departement</label>
+      <select name="Departement" required>
         <option value="Produksi">Produksi</option>
         <option value="PPIC">PPIC</option>
         <option value="Quality">Quality</option>
       </select>
-    </label>
 
-    <button type="submit">Kirim</button>
-  </form>
+      <div class="button-group">
+        <button type="submit" class="submit-btn">Kirim</button>
+        <a href="dashboard.html" class="dashboard-btn">Lihat Dashboard</a>
+      </div>
+    </form>
 
-  <p id="pesan"></p>
+    <p id="pesan"></p>
+  </div>
+
+  <!-- Spinner Overlay -->
+  <div id="overlay">
+    <div class="spinner"></div>
+  </div>
 
   <script>
     const form = document.getElementById('produksiForm');
     const pesan = document.getElementById('pesan');
+    const overlay = document.getElementById('overlay');
 
-    // Tanggal: nonaktifkan tanggal sebelumnya
+    // Set tanggal minimal hari ini
     const today = new Date().toISOString().split("T")[0];
     document.getElementById("tanggal").setAttribute("min", today);
 
-    // Dropdown dinamis Part Name berdasarkan Customer
+    // Part List
     const partList = {
       Toyota: [{ name: "Handle", number: "TY001" }, { name: "Bumper", number: "TY002" }],
       Honda: [{ name: "Knalpot", number: "HN001" }, { name: "Spion", number: "HN002" }],
@@ -90,7 +209,7 @@
     const partNameEl = document.getElementById("partName");
     const partNumberEl = document.getElementById("partNumber");
 
-    customerEl.addEventListener("change", function () {
+    customerEl.addEventListener("change", () => {
       const selectedCustomer = customerEl.value;
       partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
       if (partList[selectedCustomer]) {
@@ -101,19 +220,21 @@
           partNameEl.appendChild(option);
         });
       }
+      partNumberEl.value = "";
     });
 
-    partNameEl.addEventListener("change", function () {
+    partNameEl.addEventListener("change", () => {
       const selectedPart = partList[customerEl.value]?.find(p => p.name === partNameEl.value);
       partNumberEl.value = selectedPart ? selectedPart.number : "";
     });
 
-    // Kirim data ke Sheet.best
-    form.addEventListener('submit', async function (e) {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      overlay.style.display = "flex";
+      pesan.textContent = "";
+
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
-
       data.Timestamp = new Date().toISOString();
 
       try {
@@ -124,14 +245,18 @@
         });
 
         if (res.ok) {
-          pesan.textContent = "Data berhasil dikirim!";
+          pesan.textContent = "✅ Data berhasil dikirim!";
           form.reset();
+          partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
+          partNumberEl.value = "";
         } else {
-          pesan.textContent = "Gagal mengirim data.";
+          pesan.textContent = "❌ Gagal mengirim data.";
         }
       } catch (err) {
         console.error(err);
-        pesan.textContent = "Terjadi kesalahan.";
+        pesan.textContent = "⚠️ Terjadi kesalahan saat mengirim.";
+      } finally {
+        overlay.style.display = "none";
       }
     });
   </script>
