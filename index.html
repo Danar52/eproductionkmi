@@ -49,6 +49,12 @@
       outline: none;
     }
 
+    input[readonly] {
+      background-color: #f0f0f0;
+      color: #555;
+      cursor: not-allowed;
+    }
+
     .button-group {
       display: flex;
       justify-content: space-between;
@@ -95,7 +101,6 @@
       font-weight: 600;
     }
 
-    /* Spinner Overlay */
     #overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -132,7 +137,7 @@
     <h2>Input Data Produksi</h2>
     <form id="produksiForm">
       <label for="tanggal">Tanggal</label>
-      <input type="date" name="Tanggal" id="tanggal" required />
+      <input type="text" name="Tanggal" id="tanggal" readonly required />
 
       <label for="customer">Customer</label>
       <select name="Customer" id="customer" required>
@@ -184,7 +189,6 @@
     <p id="pesan"></p>
   </div>
 
-  <!-- Spinner Overlay -->
   <div id="overlay">
     <div class="spinner"></div>
   </div>
@@ -194,11 +198,15 @@
     const pesan = document.getElementById('pesan');
     const overlay = document.getElementById('overlay');
 
-    // Set tanggal minimal hari ini
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("tanggal").setAttribute("min", today);
+    // Set tanggal hari ini otomatis (YYYY-MM-DD)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
+    document.getElementById("tanggal").value = todayString;
 
-    // Part List
+    // Dropdown dinamis
     const partList = {
       Toyota: [{ name: "Handle", number: "TY001" }, { name: "Bumper", number: "TY002" }],
       Honda: [{ name: "Knalpot", number: "HN001" }, { name: "Spion", number: "HN002" }],
@@ -249,6 +257,7 @@
           form.reset();
           partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
           partNumberEl.value = "";
+          document.getElementById("tanggal").value = todayString;
         } else {
           pesan.textContent = "❌ Gagal mengirim data.";
         }
