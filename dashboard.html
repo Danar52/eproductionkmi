@@ -347,7 +347,7 @@
   function populateFilters(dataToFilter) {
     const partNames = new Set();
     const statuses = new Set();
-    const partNumbers = new Set(); // To collect all part numbers initially
+    const partNumbers = new Set(); 
 
     dataToFilter.forEach(row => {
       if (row["Part Name"]) partNames.add(row["Part Name"]);
@@ -355,15 +355,12 @@
       if (row["Part Number"]) partNumbers.add(row["Part Number"]);
     });
 
-    // Populate Part Name filter
     filterPartName.innerHTML = '<option value="">Semua Part Name</option>' +
       [...partNames].sort().map(p => `<option value="${p}">${p}</option>`).join("");
 
-    // Populate Status filter
     filterStatus.innerHTML = '<option value="">Semua Status</option>' +
       [...statuses].sort().map(s => `<option value="${s}">${s}</option>`).join("");
 
-    // Populate Part Number with all available part numbers
     filterPartNumber.innerHTML = '<option value="">Semua Part Number</option>' +
       [...partNumbers].sort().map(pn => `<option value="${pn}">${pn}</option>`).join("");
   }
@@ -371,7 +368,7 @@
   // Function to update Part Number options based on selected Part Name
   function updatePartNumberOptions() {
     const selectedPartName = filterPartName.value;
-    const currentPartNumber = filterPartNumber.value; // Save current selection
+    const currentPartNumber = filterPartNumber.value;
     const partNumbersForSelectedPartName = new Set();
 
     data.forEach(row => {
@@ -385,7 +382,6 @@
     filterPartNumber.innerHTML = '<option value="">Semua Part Number</option>' +
       [...partNumbersForSelectedPartName].sort().map(pn => `<option value="${pn}">${pn}</option>`).join("");
     
-    // Restore selection if it's still valid
     if (partNumbersForSelectedPartName.has(currentPartNumber)) {
         filterPartNumber.value = currentPartNumber;
     }
@@ -414,39 +410,54 @@
     });
   }
 
-  // Function to apply all active filters
+  /**
+   * REVISED FUNCTION
+   * This function now correctly handles date format conversion.
+   */
   function applyFilters() {
+    const selectedDate = filterTanggal.value; // Format: YYYY-MM-DD
+
     const filtered = data.filter(row => {
-      const tanggalMatch = !filterTanggal.value || row["Tanggal"] === filterTanggal.value;
+      // --- START OF FIX ---
+      let rowDateFormatted = null;
+      // Check if the row has a date and it's a string
+      if (row["Tanggal"] && typeof row["Tanggal"] === 'string') {
+        const parts = row["Tanggal"].split('/'); // Splits "D/M/YYYY" into ["D", "M", "YYYY"]
+        if (parts.length === 3) {
+            const day = parts[0].padStart(2, '0');
+            const month = parts[1].padStart(2, '0');
+            const year = parts[2];
+            rowDateFormatted = `${year}-${month}-${day}`; // Re-formats to YYYY-MM-DD
+        }
+      }
+      const tanggalMatch = !selectedDate || rowDateFormatted === selectedDate;
+      // --- END OF FIX ---
+
       const partNameMatch = !filterPartName.value || row["Part Name"] === filterPartName.value;
       const partNumberMatch = !filterPartNumber.value || row["Part Number"] === filterPartNumber.value;
       const statusMatch = !filterStatus.value || row["Status"] === filterStatus.value;
+      
       return tanggalMatch && partNameMatch && partNumberMatch && statusMatch;
     });
+    
     displayData(filtered);
   }
 
   // --- EVENT LISTENERS ---
 
-  // Update Part Number options when Part Name changes
   filterPartName.addEventListener("change", updatePartNumberOptions);
   
-  // Apply filters when the Filter button is clicked
   filterButton.addEventListener("click", applyFilters);
   
-  // Reset all filters when the Reset button is clicked
   resetButton.addEventListener("click", () => {
     filterTanggal.value = "";
     filterPartName.value = "";
     filterPartNumber.value = "";
     filterStatus.value = "";
-    // After resetting fields, update part number dropdown and show all data
     updatePartNumberOptions();
     displayData(data);
   });
 
-
-  // Initial data fetch when the page loads
   fetchData();
 </script>
 </body>
