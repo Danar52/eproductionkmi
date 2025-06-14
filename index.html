@@ -4,130 +4,254 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Form Input Produksi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --primary-green: #28a745;
+      --hover-green: #218838;
+      --secondary-blue: #007bff;
+      --hover-blue: #0056b3;
+      --light-bg: #eef2f6;
+      --white: #ffffff;
+      --text-dark: #343a40;
+      --text-gray: #6c757d;
+      --border-light: #ced4da;
+      --focus-border: #80bdff;
+      --shadow-light: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+      --border-radius-lg: 12px;
+      --border-radius-md: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: var(--light-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
       padding: 20px;
-      background: #f9f9f9;
     }
 
     .container {
-      max-width: 500px;
-      margin: auto;
-      background: #fff;
-      padding: 25px 30px;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 550px;
+      background: var(--white);
+      padding: 35px 40px;
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-light);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     h2 {
       text-align: center;
+      margin-bottom: 30px;
+      color: var(--primary-green);
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .form-group {
       margin-bottom: 20px;
-      color: #333;
     }
 
     label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
       font-weight: 600;
+      color: var(--text-dark);
+      font-size: 0.95rem;
     }
 
     input, select {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      transition: border-color 0.3s ease;
+      padding: 12px 15px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--border-radius-md);
+      font-size: 1rem;
+      color: var(--text-dark);
+      background-color: var(--white);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      -webkit-appearance: none; /* Remove default browser styling for select */
+      -moz-appearance: none;
+      appearance: none;
     }
 
+    select {
+        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236c757d%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-5.4H18.6c-5%200-9.3%201.8-13.2%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2013.2l128%20128c3.9%203.9%208.7%205.8%2013.2%205.8s9.3-1.9%2013.2-5.8l128-128c3.6-3.6%205.4-7.8%205.4-13.2s-1.8-9.3-5.4-13.2z%22%2F%3E%3C%2Fsvg%3E');
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 1em;
+        padding-right: 30px; /* Make space for the arrow */
+    }
+
+
     input:focus, select:focus {
-      border-color: #4caf50;
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
       outline: none;
     }
 
     input[readonly] {
-      background-color: #f0f0f0;
-      color: #555;
+      background-color: var(--light-bg);
+      color: var(--text-gray);
       cursor: not-allowed;
     }
 
     .button-group {
       display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 15px;
+      margin-top: 25px;
     }
 
     .button-group button,
     .button-group a {
       flex: 1;
-      padding: 10px;
+      padding: 14px 20px;
       border: none;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: bold;
+      border-radius: var(--border-radius-md);
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .button-group i {
+      margin-right: 8px;
     }
 
     .submit-btn {
-      background-color: #4caf50;
-      color: white;
+      background-color: var(--primary-green);
+      color: var(--white);
     }
 
     .submit-btn:hover {
-      background-color: #43a047;
+      background-color: var(--hover-green);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-light);
     }
 
     .dashboard-btn {
-      background-color: #1976d2;
-      color: white;
-      text-decoration: none;
-      line-height: 34px;
+      background-color: var(--secondary-blue);
+      color: var(--white);
     }
 
     .dashboard-btn:hover {
-      background-color: #1565c0;
+      background-color: var(--hover-blue);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-light);
     }
 
     #pesan {
-      margin-top: 15px;
+      margin-top: 25px;
+      padding: 10px;
+      border-radius: var(--border-radius-md);
       text-align: center;
       font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-dark); /* Default color */
+    }
+
+    #pesan.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    #pesan.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
 
     #overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.7);
+      background: rgba(0,0,0,0.4); /* Darker overlay */
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 999;
-      display: none;
+      z-index: 9999; /* Higher z-index */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    #overlay.show {
+      opacity: 1;
+      visibility: visible;
     }
 
     .spinner {
-      width: 50px;
-      height: 50px;
-      border: 6px solid #e0e0e0;
-      border-top: 6px solid #4caf50;
+      width: 60px;
+      height: 60px;
+      border: 6px solid rgba(255,255,255,0.3);
+      border-top: 6px solid var(--primary-green);
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
 
+    /* Responsive Adjustments */
     @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+        margin: 15px;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      input, select {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+      }
+
       .button-group {
         flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .button-group button,
+      .button-group a {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .container {
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 1.3rem;
       }
     }
   </style>
@@ -136,43 +260,59 @@
   <div class="container">
     <h2>Input Data Produksi</h2>
     <form id="produksiForm">
-      <label for="tanggal">Tanggal</label>
-      <input type="text" name="Tanggal" id="tanggal" readonly required />
+      <div class="form-group">
+        <label for="tanggal">Tanggal</label>
+        <input type="date" name="Tanggal" id="tanggal" readonly required />
+      </div>
 
-      <label for="customer">Customer</label>
-      <select name="Customer" id="customer" required>
-        <option value="">--Pilih Customer--</option>
-      </select>
+      <div class="form-group">
+        <label for="customer">Customer</label>
+        <select name="Customer" id="customer" required>
+          <option value="">--Pilih Customer--</option>
+        </select>
+      </div>
 
-      <label for="partName">Part Name</label>
-      <select name="Part Name" id="partName" required>
-        <option value="">--Pilih Part--</option>
-      </select>
+      <div class="form-group">
+        <label for="partName">Part Name</label>
+        <select name="Part Name" id="partName" required>
+          <option value="">--Pilih Part--</option>
+        </select>
+      </div>
 
-      <label for="partNumber">Part Number</label>
-      <input type="text" name="Part Number" id="partNumber" readonly />
+      <div class="form-group">
+        <label for="partNumber">Part Number</label>
+        <input type="text" name="Part Number" id="partNumber" readonly />
+      </div>
 
-      <label for="status">Status</label>
-      <select name="Status" required>
-        <option value="">--Pilih Status--</option>
-      </select>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select name="Status" id="status" required>
+          <option value="">--Pilih Status--</option>
+        </select>
+      </div>
 
-      <label for="jumlah">Jumlah</label>
-      <input type="number" name="Jumlah" required />
+      <div class="form-group">
+        <label for="jumlah">Jumlah</label>
+        <input type="number" name="Jumlah" id="jumlah" min="0" required />
+      </div>
 
-      <label for="satuan">Satuan</label>
-      <select name="Satuan" required>
-        <option value="">--Pilih Satuan--</option>
-      </select>
+      <div class="form-group">
+        <label for="satuan">Satuan</label>
+        <select name="Satuan" id="satuan" required>
+          <option value="">--Pilih Satuan--</option>
+        </select>
+      </div>
 
-      <label for="departement">Departement</label>
-      <select name="Departement" required>
-        <option value="">--Pilih Departement--</option>
-      </select>
+      <div class="form-group">
+        <label for="departement">Departement</label>
+        <select name="Departement" id="departement" required>
+          <option value="">--Pilih Departement--</option>
+        </select>
+      </div>
 
       <div class="button-group">
-        <button type="submit" class="submit-btn">Kirim</button>
-        <a href="dashboard.html" class="dashboard-btn">Lihat Dashboard</a>
+        <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Kirim Data</button>
+        <a href="dashboard.html" class="dashboard-btn"><i class="fas fa-chart-line"></i> Lihat Dashboard</a>
       </div>
     </form>
 
@@ -188,78 +328,111 @@
     const pesan = document.getElementById('pesan');
     const overlay = document.getElementById('overlay');
 
+    const tanggalEl = document.getElementById("tanggal");
     const customerEl = document.getElementById("customer");
     const partNameEl = document.getElementById("partName");
     const partNumberEl = document.getElementById("partNumber");
+    const statusEl = document.getElementById("status");
+    const jumlahEl = document.getElementById("jumlah");
+    const satuanEl = document.getElementById("satuan");
+    const departementEl = document.getElementById("departement");
 
+    const API_BASE_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+
+    // Store part data grouped by customer for dynamic updates
     const partList = {};
 
-    // Set tanggal hari ini
+    // Set today's date automatically
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const todayString = `${yyyy}-${mm}-${dd}`;
-    document.getElementById("tanggal").value = todayString;
+    tanggalEl.value = todayString;
 
-    // Ambil data master
+    // --- Master Data Fetching ---
     async function fetchMasterData() {
       try {
-        const [customerData, partData, statusData, satuanData, departementData] = await Promise.all([
-          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/CUSTOMER').then(res => res.json()),
-          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/PART').then(res => res.json()),
-          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/STATUS').then(res => res.json()),
-          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/SATUAN').then(res => res.json()),
-          fetch('https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249/tabs/DEPARTEMENT').then(res => res.json()),
+        const [customerRes, partRes, statusRes, satuanRes, departementRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/tabs/CUSTOMER`),
+          fetch(`${API_BASE_URL}/tabs/PART`),
+          fetch(`${API_BASE_URL}/tabs/STATUS`),
+          fetch(`${API_BASE_URL}/tabs/SATUAN`),
+          fetch(`${API_BASE_URL}/tabs/DEPARTEMENT`),
         ]);
 
+        const customerData = await customerRes.json();
+        const partData = await partRes.json();
+        const statusData = await statusRes.json();
+        const satuanData = await satuanRes.json();
+        const departementData = await departementRes.json();
+
+        // Populate Customer dropdown
         customerData.forEach(c => {
-          const opt = document.createElement("option");
-          opt.value = c.Customer;
-          opt.textContent = c.Customer;
-          customerEl.appendChild(opt);
+          if (c.Customer) { // Ensure customer data exists
+            const opt = document.createElement("option");
+            opt.value = c.Customer;
+            opt.textContent = c.Customer;
+            customerEl.appendChild(opt);
+          }
         });
 
+        // Organize Part data by Customer
         partData.forEach(p => {
-          if (!partList[p.Customer]) partList[p.Customer] = [];
-          partList[p.Customer].push({ name: p["Part Name"], number: p["Part No."] });
+          if (p.Customer && p["Part Name"] && p["Part No."]) { // Ensure all relevant part data exists
+            if (!partList[p.Customer]) partList[p.Customer] = [];
+            partList[p.Customer].push({ name: p["Part Name"], number: p["Part No."] });
+          }
         });
 
+        // Populate Status dropdown
         statusData.forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s.Status;
-          opt.textContent = s.Status;
-          document.querySelector('select[name="Status"]').appendChild(opt);
+          if (s.Status) {
+            const opt = document.createElement("option");
+            opt.value = s.Status;
+            opt.textContent = s.Status;
+            statusEl.appendChild(opt);
+          }
         });
 
+        // Populate Satuan dropdown
         satuanData.forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s.Satuan;
-          opt.textContent = s.Satuan;
-          document.querySelector('select[name="Satuan"]').appendChild(opt);
+          if (s.Satuan) {
+            const opt = document.createElement("option");
+            opt.value = s.Satuan;
+            opt.textContent = s.Satuan;
+            satuanEl.appendChild(opt);
+          }
         });
 
+        // Populate Departement dropdown
         departementData.forEach(d => {
-          const opt = document.createElement("option");
-          opt.value = d.Departement;
-          opt.textContent = d.Departement;
-          document.querySelector('select[name="Departement"]').appendChild(opt);
+          if (d.Departement) {
+            const opt = document.createElement("option");
+            opt.value = d.Departement;
+            opt.textContent = d.Departement;
+            departementEl.appendChild(opt);
+          }
         });
       } catch (err) {
-        console.error("Gagal ambil master:", err);
-        pesan.textContent = "⚠️ Gagal ambil master data.";
+        console.error("Failed to fetch master data:", err);
+        displayMessage("⚠️ Gagal memuat data master. Coba refresh halaman.", "error");
       }
     }
 
     fetchMasterData();
 
+    // --- Event Listeners for Dynamic Form Fields ---
+
     customerEl.addEventListener("change", () => {
       const selectedCustomer = customerEl.value;
-      partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
-      partNumberEl.value = "";
+      partNameEl.innerHTML = '<option value="">--Pilih Part--</option>'; // Reset Part Name
+      partNumberEl.value = ""; // Clear Part Number
 
-      if (partList[selectedCustomer]) {
-        partList[selectedCustomer].forEach(part => {
+      if (selectedCustomer && partList[selectedCustomer]) {
+        // Sort part names alphabetically for better UX
+        const sortedParts = partList[selectedCustomer].sort((a, b) => a.name.localeCompare(b.name));
+        sortedParts.forEach(part => {
           const opt = document.createElement("option");
           opt.value = part.name;
           opt.textContent = part.name;
@@ -271,42 +444,60 @@
     partNameEl.addEventListener("change", () => {
       const selectedCustomer = customerEl.value;
       const selectedPartName = partNameEl.value;
+      // Find the corresponding part number
       const part = partList[selectedCustomer]?.find(p => p.name === selectedPartName);
       partNumberEl.value = part ? part.number : "";
     });
 
+    // --- Form Submission ---
     form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      overlay.style.display = "flex";
-      pesan.textContent = "";
+      e.preventDefault(); // Prevent default form submission
+
+      overlay.classList.add("show"); // Show loading overlay
+      pesan.textContent = ""; // Clear previous messages
+      pesan.className = ""; // Clear previous message classes
 
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
-      data.Timestamp = new Date().toISOString();
+      data.Timestamp = new Date().toISOString(); // Add a timestamp
 
       try {
-        const res = await fetch("https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249", {
+        const res = await fetch(API_BASE_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
 
         if (res.ok) {
-          pesan.textContent = "✅ Data berhasil dikirim!";
-          form.reset();
-          document.getElementById("tanggal").value = todayString;
-          partNameEl.innerHTML = '<option value="">--Pilih Part--</option>';
-          partNumberEl.value = "";
+          displayMessage("✅ Data berhasil dikirim!", "success");
+          form.reset(); // Clear form fields
+          tanggalEl.value = todayString; // Reset date
+          partNameEl.innerHTML = '<option value="">--Pilih Part--</option>'; // Reset Part Name dropdown
+          partNumberEl.value = ""; // Clear Part Number
+          customerEl.value = ""; // Reset customer dropdown
+          // Reset other dropdowns
+          statusEl.value = "";
+          satuanEl.value = "";
+          departementEl.value = "";
         } else {
-          pesan.textContent = "❌ Gagal mengirim data.";
+          const errorData = await res.json();
+          console.error("Failed to submit data:", errorData);
+          displayMessage(`❌ Gagal mengirim data. Error: ${errorData.message || res.statusText}`, "error");
         }
       } catch (err) {
-        console.error(err);
-        pesan.textContent = "⚠️ Terjadi kesalahan saat mengirim.";
+        console.error("Submission error:", err);
+        displayMessage("⚠️ Terjadi kesalahan jaringan. Coba lagi.", "error");
       } finally {
-        overlay.style.display = "none";
+        overlay.classList.remove("show"); // Hide loading overlay
       }
     });
+
+    // Helper function to display messages
+    function displayMessage(message, type) {
+      pesan.textContent = message;
+      pesan.className = ""; // Clear existing classes
+      pesan.classList.add(type); // Add success or error class
+    }
   </script>
 </body>
 </html>

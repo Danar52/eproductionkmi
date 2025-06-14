@@ -3,175 +3,383 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Produksi</title>
+  <title>Dashboard Monitoring Produksi Harian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
+    :root {
+      --primary: #28a745; /* Darker green */
+      --secondary: #007bff; /* Blue */
+      --bg: #f8f9fa; /* Lighter background */
+      --white: #ffffff;
+      --gray: #6c757d;
+      --light-gray: #e9ecef;
+      --dark-gray: #343a40;
+      --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+      --border-radius: 0.5rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 20px;
-      background: #f0f0f0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      line-height: 1.6;
+      color: var(--dark-gray);
     }
 
     .container {
-      max-width: 95%;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 1300px;
+      margin: 20px auto;
+      padding: 0 20px;
     }
 
-    h2 {
-      text-align: center;
-      color: #333;
+    header {
+      background-color: var(--white);
+      padding: 25px 20px;
+      margin-bottom: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--white);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
     }
 
     .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .filters label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: var(--gray);
     }
 
     .filters input,
     .filters select {
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      min-width: 160px;
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--light-gray);
+      background-color: var(--white);
+      font-size: 1rem;
+      color: var(--dark-gray);
+      transition: all 0.3s ease;
+    }
+
+    .filters input:focus,
+    .filters select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      outline: none;
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+      border-collapse: separate; /* Use separate to allow border-radius on cells */
+      border-spacing: 0;
+      margin-top: 20px;
+    }
+
+    table thead {
+      background-color: var(--primary);
+      color: var(--white);
     }
 
     table th, table td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: center;
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--light-gray);
     }
 
-    table th {
-      background-color: #4caf50;
-      color: white;
+    table th:first-child {
+        border-top-left-radius: var(--border-radius);
+    }
+
+    table th:last-child {
+        border-top-right-radius: var(--border-radius);
+    }
+
+    table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    table tbody tr:nth-child(even) {
+      background-color: var(--bg);
+    }
+
+    table tbody tr:hover {
+      background-color: #e2f0e6; /* Light green on hover */
+      cursor: pointer;
     }
 
     .back-btn {
-      display: inline-block;
-      margin-bottom: 15px;
-      padding: 10px 15px;
-      background-color: #1976d2;
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: var(--secondary);
       color: white;
       text-decoration: none;
-      border-radius: 8px;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .back-btn i {
+      margin-right: 8px;
     }
 
     .back-btn:hover {
-      background-color: #135bb2;
+      background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+
+    .table-responsive {
+      overflow-x: auto; /* Enables horizontal scrolling on small screens */
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 15px;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 20px 15px;
+      }
+
+      header h1 {
+        font-size: 24px;
+        text-align: center;
+        width: 100%;
+      }
+
+      .back-btn {
+        width: fit-content;
+        margin-top: 10px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr; /* Stack filters on small screens */
+      }
+
+      table th, table td {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 20px;
+      }
+
+      .filters input,
+      .filters select {
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+
+      .back-btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <a href="index.html" class="back-btn">← Kembali ke Form</a>
-    <h2>Dashboard Produksi</h2>
+    <header>
+      <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali ke Form</a>
+      <h1>Dashboard Monitoring Produksi Harian</h1>
+    </header>
 
-    <div class="filters">
-      <input type="date" id="filterTanggal" />
-      <select id="filterCustomer"><option value="">Customer</option></select>
-      <select id="filterPartName"><option value="">Part Name</option></select>
-      <select id="filterStatus"><option value="">Status</option></select>
+    <div class="card">
+      <div class="filters">
+        <div>
+            <label for="filterTanggal">Tanggal:</label>
+            <input type="date" id="filterTanggal" />
+        </div>
+        <div>
+            <label for="filterPartName">Part Name:</label>
+            <select id="filterPartName"><option value="">Semua Part Name</option></select>
+        </div>
+        <div>
+            <label for="filterPartNumber">Part Number:</label>
+            <select id="filterPartNumber"><option value="">Semua Part Number</option></select>
+        </div>
+        <div>
+            <label for="filterStatus">Status:</label>
+            <select id="filterStatus"><option value="">Semua Status</option></select>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Customer</th>
+              <th>Part Name</th>
+              <th>Part Number</th>
+              <th>Status</th>
+              <th>Jumlah</th>
+              <th>Satuan</th>
+              <th>Departement</th>
+            </tr>
+          </thead>
+          <tbody id="dataTable"></tbody>
+        </table>
+      </div>
     </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Tanggal</th>
-          <th>Customer</th>
-          <th>Part Name</th>
-          <th>Part Number</th>
-          <th>Status</th>
-          <th>Jumlah</th>
-          <th>Satuan</th>
-          <th>Departement</th>
-        </tr>
-      </thead>
-      <tbody id="dataTable"></tbody>
-    </table>
   </div>
 
-  <script>
-    const API_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+<script>
+  const API_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
 
-    const tableBody = document.getElementById("dataTable");
-    const filterTanggal = document.getElementById("filterTanggal");
-    const filterCustomer = document.getElementById("filterCustomer");
-    const filterPartName = document.getElementById("filterPartName");
-    const filterStatus = document.getElementById("filterStatus");
+  const tableBody = document.getElementById("dataTable");
+  const filterTanggal = document.getElementById("filterTanggal");
+  const filterPartName = document.getElementById("filterPartName");
+  const filterPartNumber = document.getElementById("filterPartNumber");
+  const filterStatus = document.getElementById("filterStatus");
 
-    let data = [];
+  let data = []; // This will store the fetched data
 
-    async function fetchData() {
+  // Function to fetch data from the API
+  async function fetchData() {
+    try {
       const res = await fetch(API_URL);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const result = await res.json();
-      data = result;
+      data = result; // Store the fetched data globally
       populateFilters(data);
       displayData(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Gagal memuat data. Silakan coba lagi nanti.</td></tr>';
     }
+  }
 
-    function populateFilters(data) {
-      const customers = new Set();
-      const parts = new Set();
-      const statuses = new Set();
+  // Function to populate filter dropdowns based on fetched data
+  function populateFilters(dataToFilter) {
+    const partNames = new Set();
+    const statuses = new Set();
+    const partNumbers = new Set(); // To collect all part numbers initially
 
-      data.forEach(row => {
-        if (row["Customer"]) customers.add(row["Customer"]);
-        if (row["Part Name"]) parts.add(row["Part Name"]);
-        if (row["Status"]) statuses.add(row["Status"]);
-      });
+    dataToFilter.forEach(row => {
+      if (row["Part Name"]) partNames.add(row["Part Name"]);
+      if (row["Status"]) statuses.add(row["Status"]);
+      if (row["Part Number"]) partNumbers.add(row["Part Number"]);
+    });
 
-      filterCustomer.innerHTML = '<option value="">Customer</option>' + [...customers].map(c => `<option value="${c}">${c}</option>`).join("");
-      filterPartName.innerHTML = '<option value="">Part Name</option>' + [...parts].map(p => `<option value="${p}">${p}</option>`).join("");
-      filterStatus.innerHTML = '<option value="">Status</option>' + [...statuses].map(s => `<option value="${s}">${s}</option>`).join("");
+    // Populate Part Name filter
+    filterPartName.innerHTML = '<option value="">Semua Part Name</option>' +
+      [...partNames].sort().map(p => `<option value="${p}">${p}</option>`).join("");
+
+    // Populate Status filter
+    filterStatus.innerHTML = '<option value="">Semua Status</option>' +
+      [...statuses].sort().map(s => `<option value="${s}">${s}</option>`).join("");
+
+    // Initially populate Part Number with all available part numbers
+    filterPartNumber.innerHTML = '<option value="">Semua Part Number</option>' +
+      [...partNumbers].sort().map(pn => `<option value="${pn}">${pn}</option>`).join("");
+  }
+
+  // Function to update Part Number options based on selected Part Name
+  function updatePartNumberOptions() {
+    const selectedPartName = filterPartName.value;
+    const partNumbersForSelectedPartName = new Set();
+
+    data.forEach(row => {
+      if (!selectedPartName || row["Part Name"] === selectedPartName) {
+        if (row["Part Number"]) {
+          partNumbersForSelectedPartName.add(row["Part Number"]);
+        }
+      }
+    });
+
+    filterPartNumber.innerHTML = '<option value="">Semua Part Number</option>' +
+      [...partNumbersForSelectedPartName].sort().map(pn => `<option value="${pn}">${pn}</option>`).join("");
+
+    // Reset Part Number filter if the previously selected Part Number is not available for the new Part Name
+    if (filterPartNumber.value && !partNumbersForSelectedPartName.has(filterPartNumber.value)) {
+        filterPartNumber.value = "";
     }
+  }
 
-    function displayData(filteredData) {
-      tableBody.innerHTML = "";
-      filteredData.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${row["Tanggal"] || ""}</td>
-          <td>${row["Customer"] || ""}</td>
-          <td>${row["Part Name"] || ""}</td>
-          <td>${row["Part Number"] || ""}</td>
-          <td>${row["Status"] || ""}</td>
-          <td>${row["Jumlah"] || ""}</td>
-          <td>${row["Satuan"] || ""}</td>
-          <td>${row["Departement"] || ""}</td>
-        `;
-        tableBody.appendChild(tr);
-      });
+  // Function to display data in the table
+  function displayData(filteredData) {
+    tableBody.innerHTML = "";
+    if (filteredData.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Tidak ada data yang tersedia untuk filter yang dipilih.</td></tr>';
+      return;
     }
+    filteredData.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row["Tanggal"] || ""}</td>
+        <td>${row["Customer"] || ""}</td>
+        <td>${row["Part Name"] || ""}</td>
+        <td>${row["Part Number"] || ""}</td>
+        <td>${row["Status"] || ""}</td>
+        <td>${row["Jumlah"] || ""}</td>
+        <td>${row["Satuan"] || ""}</td>
+        <td>${row["Departement"] || ""}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
 
-    function applyFilters() {
-      const filtered = data.filter(row => {
-        return (!filterTanggal.value || row["Tanggal"] === filterTanggal.value)
-          && (!filterCustomer.value || row["Customer"] === filterCustomer.value)
-          && (!filterPartName.value || row["Part Name"] === filterPartName.value)
-          && (!filterStatus.value || row["Status"] === filterStatus.value);
-      });
-      displayData(filtered);
-    }
+  // Function to apply all active filters
+  function applyFilters() {
+    const filtered = data.filter(row => {
+      const tanggalMatch = !filterTanggal.value || row["Tanggal"] === filterTanggal.value;
+      const partNameMatch = !filterPartName.value || row["Part Name"] === filterPartName.value;
+      const partNumberMatch = !filterPartNumber.value || row["Part Number"] === filterPartNumber.value;
+      const statusMatch = !filterStatus.value || row["Status"] === filterStatus.value;
+      return tanggalMatch && partNameMatch && partNumberMatch && statusMatch;
+    });
+    displayData(filtered);
+  }
 
-    filterTanggal.addEventListener("change", applyFilters);
-    filterCustomer.addEventListener("change", applyFilters);
-    filterPartName.addEventListener("change", applyFilters);
-    filterStatus.addEventListener("change", applyFilters);
+  // Event Listeners for filter changes
+  filterTanggal.addEventListener("change", applyFilters);
+  filterPartName.addEventListener("change", () => {
+    updatePartNumberOptions(); // Update Part Number options first
+    applyFilters();
+  });
+  filterPartNumber.addEventListener("change", applyFilters);
+  filterStatus.addEventListener("change", applyFilters);
 
-    fetchData();
-  </script>
+  // Initial data fetch when the page loads
+  fetchData();
+</script>
 </body>
 </html>
