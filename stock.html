@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Monitoring Stok</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #007bff; /* Blue for primary actions/headers, common in inventory */
+      --secondary: #28a745; /* Green for success/dashboard button */
+      --danger: #dc3545; /* Red for reset */
+      --bg: #f8f9fa; /* Lighter background */
+      --white: #ffffff;
+      --gray: #6c757d;
+      --light-gray: #e9ecef;
+      --dark-gray: #343a40;
+      --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+      --border-radius: 0.5rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      line-height: 1.6;
+      color: var(--dark-gray);
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    header {
+      background-color: var(--white);
+      padding: 25px 20px;
+      margin-bottom: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--white);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+      align-items: end; /* Align items to the bottom */
+    }
+
+    .filters label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: var(--gray);
+    }
+
+    .filters input,
+    .filters select {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--light-gray);
+      background-color: var(--white);
+      font-size: 1rem;
+      color: var(--dark-gray);
+      transition: all 0.3s ease;
+    }
+
+    .filters input:focus,
+    .filters select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Adjusted for primary blue */
+      outline: none;
+    }
+    
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      /* This will make the buttons take up the full column width on smaller screens */
+      grid-column: 1 / -1; 
+    }
+
+    .filter-btn, .reset-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: var(--border-radius);
+        color: var(--white);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .filter-btn {
+        background-color: var(--primary);
+    }
+
+    .filter-btn:hover {
+        background-color: #0056b3; /* Darker blue */
+    }
+    
+    .reset-btn {
+        background-color: var(--danger);
+    }
+    
+    .reset-btn:hover {
+        background-color: #c82333; /* Darker red */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate; /* Use separate to allow border-radius on cells */
+      border-spacing: 0;
+      margin-top: 20px;
+    }
+
+    table thead {
+      background-color: var(--primary);
+      color: var(--white);
+    }
+
+    table th, table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    table th:first-child {
+        border-top-left-radius: var(--border-radius);
+    }
+
+    table th:last-child {
+        border-top-right-radius: var(--border-radius);
+    }
+
+    table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    table tbody tr:nth-child(even) {
+      background-color: var(--bg);
+    }
+
+    table tbody tr:hover {
+      background-color: #e6f2ff; /* Light blue on hover */
+      cursor: pointer;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: var(--secondary);
+      color: white;
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .back-btn i {
+      margin-right: 8px;
+    }
+
+    .back-btn:hover {
+      background-color: #218838; /* Darker green */
+      transform: translateY(-2px);
+    }
+
+    .table-responsive {
+      overflow-x: auto; /* Enables horizontal scrolling on small screens */
+    }
+
+    /* Styles for the copyright section */
+    .copyright {
+      text-align: center;
+      margin-top: 25px;
+      padding: 15px;
+      color: var(--gray);
+      font-size: 0.9rem;
+      background-color: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    @media (min-width: 875px) {
+        .filter-buttons {
+            grid-column: auto; /* Revert grid-column on larger screens */
+        }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 15px;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 20px 15px;
+      }
+
+      header h1 {
+        font-size: 24px;
+        text-align: center;
+        width: 100%;
+      }
+
+      .back-btn {
+        width: fit-content;
+        margin-top: 10px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr; /* Stack filters on small screens */
+      }
+
+      table th, table td {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .copyright {
+        padding: 10px;
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 20px;
+      }
+
+      .filters input,
+      .filters select {
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+
+      .back-btn, .filter-btn, .reset-btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <!-- Link back to dashboard for navigation, assuming it's dashboard.html -->
+      <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali ke Dashboard Produksi</a>
+      <h1>Dashboard Monitoring Stok</h1>
+    </header>
+
+    <div class="card">
+      <div class="filters">
+        <div>
+            <label for="filterPartName">Part Name:</label>
+            <select id="filterPartName"><option value="">Semua Part Name</option></select>
+        </div>
+        <div>
+            <label for="filterPartNumber">Part Number:</label>
+            <select id="filterPartNumber"><option value="">Semua Part Number</option></select>
+        </div>
+        <div>
+            <label for="filterCustomer">Customer:</label>
+            <select id="filterCustomer"><option value="">Semua Customer</option></select>
+        </div>
+        <!-- Removed Status Filter as stock is now categorized -->
+        <!-- <div>
+            <label for="filterStatus">Status Stok:</label>
+            <select id="filterStatus"><option value="">Semua Status</option></select>
+        </div> -->
+        <!-- Button Container -->
+        <div class="filter-buttons">
+            <button id="filterButton" class="filter-btn"><i class="fas fa-filter"></i> Filter</button>
+            <button id="resetButton" class="reset-btn"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Part Name</th>
+              <th>Part Number</th>
+              <th>Customer</th>
+              <th>Satuan</th>
+              <th>STOK MATERIAL</th>
+              <th>STOK WIP</th>
+              <th>STOK FINISH GOOD</th>
+            </tr>
+          </thead>
+          <tbody id="dataTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Copyright Section -->
+    <div class="copyright">
+      <p>&copy; 2025 Dashboard Monitoring Stok. Hak Cipta Dilindungi Undang-Undang.</p>
+    </div>
+
+  </div>
+
+<script>
+  const API_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+
+  const tableBody = document.getElementById("dataTable");
+  const filterPartName = document.getElementById("filterPartName");
+  const filterPartNumber = document.getElementById("filterPartNumber");
+  const filterCustomer = document.getElementById("filterCustomer");
+  const filterButton = document.getElementById("filterButton");
+  const resetButton = document.getElementById("resetButton");
+
+  let data = []; // This will store the fetched data
+
+  // Function to fetch data from the API
+  async function fetchData() {
+    try {
+      // Show loading state, updated colspan to 7 (Part Name, Part Number, Customer, Satuan, MATERIAL, WIP, FINISH GOOD)
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Memuat data stok...</td></tr>';
+      const res = await fetch(API_URL);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const result = await res.json();
+      data = result; // Store the fetched data globally
+      populateFilters(data);
+      displayData(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // Updated colspan to 7
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Gagal memuat data stok. Silakan coba lagi nanti.</td></tr>';
+    }
+  }
+
+  // Function to populate filter dropdowns based on fetched data
+  function populateFilters(dataToFilter) {
+    const partNames = new Set();
+    const partNumbers = new Set();
+    const customers = new Set();
+
+    dataToFilter.forEach(row => {
+      if (row["Part Name"]) partNames.add(row["Part Name"]);
+      if (row["Part Number"]) partNumbers.add(row["Part Number"]);
+      if (row["Customer"]) customers.add(row["Customer"]);
+    });
+
+    filterPartName.innerHTML = '<option value="">Semua Part Name</option>' +
+      [...partNames].sort().map(p => `<option value="${p}">${p}</option>`).join("");
+
+    filterPartNumber.innerHTML = '<option value="">Semua Part Number</option>' +
+      [...partNumbers].sort().map(pn => `<option value="${pn}">${pn}</option>`).join("");
+    
+    filterCustomer.innerHTML = '<option value="">Semua Customer</option>' +
+      [...customers].sort().map(c => `<option value="${c}">${c}</option>`).join("");
+  }
+
+  // Function to update Part Number options based on selected Part Name
+  function updatePartNumberOptions() {
+    const selectedPartName = filterPartName.value;
+    const currentPartNumber = filterPartNumber.value;
+    const partNumbersForSelectedPartName = new Set();
+
+    data.forEach(row => {
+      if (!selectedPartName || row["Part Name"] === selectedPartName) {
+        if (row["Part Number"]) {
+          partNumbersForSelectedPartName.add(row["Part Number"]);
+        }
+      }
+    });
+
+    filterPartNumber.innerHTML = '<option value="">Semua Part Number</option>' +
+      [...partNumbersForSelectedPartName].sort().map(pn => `<option value="${pn}">${pn}</option>`).join("");
+    
+    if (partNumbersForSelectedPartName.has(currentPartNumber)) {
+        filterPartNumber.value = currentPartNumber;
+    }
+  }
+
+  // Function to display data in the table with categorized stock and netting logic
+  function displayData(filteredData) {
+    tableBody.innerHTML = "";
+    if (filteredData.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Tidak ada data stok yang ditemukan.</td></tr>';
+      return;
+    }
+    
+    const aggregatedStocks = {};
+
+    // First pass: Aggregate quantities for each status and key (Part, Customer, Satuan)
+    filteredData.forEach(row => {
+        const key = `${row["Part Name"] || ""}-${row["Part Number"] || ""}-${row["Customer"] || ""}-${row["Satuan"] || ""}`;
+        
+        if (!aggregatedStocks[key]) {
+            aggregatedStocks[key] = {
+                "Part Name": row["Part Name"] || "",
+                "Part Number": row["Part Number"] || "",
+                "Customer": row["Customer"] || "",
+                "Satuan": row["Satuan"] || "",
+                "materialStock": 0, // Current stock for Material
+                "wipStock": 0,      // Current stock for WIP
+                "fgStock": 0,       // Current stock for Finish Good
+                "totalFGProduced": 0 // Track total FG produced for consumption calculation
+            };
+        }
+        
+        const quantity = parseInt(row["Jumlah"]) || 0;
+        const status = row["Status"];
+
+        if (status === "MATERIAL") {
+            aggregatedStocks[key]["materialStock"] += quantity;
+        } else if (status === "WIP") {
+            aggregatedStocks[key]["wipStock"] += quantity;
+        } else if (status === "FINISH GOOD") {
+            aggregatedStocks[key]["fgStock"] += quantity;
+            // Also track how much FG was produced, as this drives consumption
+            aggregatedStocks[key]["totalFGProduced"] += quantity;
+        }
+    });
+
+    const finalDisplayData = [];
+
+    // Second pass: Calculate net stock based on consumption hierarchy
+    for (const key in aggregatedStocks) {
+        const stockItem = aggregatedStocks[key];
+
+        let currentMaterialStock = stockItem.materialStock;
+        let currentWIPStock = stockItem.wipStock;
+        let currentFGStock = stockItem.fgStock; // This is the total FG quantity that entered
+
+        // Logic for consumption driven by FINISH GOOD production:
+        // How much FINISH GOOD production needs to consume materials?
+        let fgConsumptionDemand = stockItem.totalFGProduced;
+
+        // 1. FINISH GOOD production consumes WIP first
+        const consumedWIPbyFG = Math.min(currentWIPStock, fgConsumptionDemand);
+        currentWIPStock -= consumedWIPbyFG;
+        fgConsumptionDemand -= consumedWIPbyFG; // Remaining FG production still needs material
+
+        // 2. If WIP is exhausted, FINISH GOOD production consumes MATERIAL directly
+        const consumedMaterialbyFG = Math.min(currentMaterialStock, fgConsumptionDemand);
+        currentMaterialStock -= consumedMaterialbyFG;
+        
+        // Ensure stock values don't go below zero for display, as physical stock can't be negative
+        currentMaterialStock = Math.max(0, currentMaterialStock);
+        currentWIPStock = Math.max(0, currentWIPStock); 
+        currentFGStock = Math.max(0, currentFGStock); // FG stock is just accumulated production, no internal consumption for FG
+
+        finalDisplayData.push({
+            "Part Name": stockItem["Part Name"],
+            "Part Number": stockItem["Part Number"],
+            "Customer": stockItem["Customer"],
+            "Satuan": stockItem["Satuan"],
+            "STOK MATERIAL": currentMaterialStock,
+            "STOK WIP": currentWIPStock,
+            "STOK FINISH GOOD": currentFGStock
+        });
+    }
+
+    finalDisplayData.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row["Part Name"] || ""}</td>
+        <td>${row["Part Number"] || ""}</td>
+        <td>${row["Customer"] || ""}</td>
+        <td>${row["Satuan"] || ""}</td>
+        <td>${row["STOK MATERIAL"]}</td>
+        <td>${row["STOK WIP"]}</td>
+        <td>${row["STOK FINISH GOOD"]}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+
+  // Function to apply filters
+  function applyFilters() {
+    const partNameFilter = filterPartName.value;
+    const partNumberFilter = filterPartNumber.value;
+    const customerFilter = filterCustomer.value;
+    
+    const filtered = data.filter(row => {
+      const partNameMatch = !partNameFilter || row["Part Name"] === partNameFilter;
+      const partNumberMatch = !partNumberFilter || row["Part Number"] === partNumberFilter;
+      const customerMatch = !customerFilter || row["Customer"] === customerFilter;
+      
+      return partNameMatch && partNumberMatch && customerMatch;
+    });
+    
+    displayData(filtered);
+  }
+
+  // --- EVENT LISTENERS ---
+
+  filterPartName.addEventListener("change", updatePartNumberOptions);
+  
+  filterButton.addEventListener("click", applyFilters);
+  
+  resetButton.addEventListener("click", () => {
+    filterPartName.value = "";
+    filterPartNumber.value = "";
+    filterCustomer.value = "";
+    updatePartNumberOptions();
+    displayData(data); // Display all data
+  });
+
+  fetchData();
+</script>
+</body>
+</html>
