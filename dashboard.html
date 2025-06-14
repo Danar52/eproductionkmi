@@ -3,168 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Produksi - Filter</title>
+  <title>Dashboard Produksi</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 20px;
+      background: #f0f0f0;
     }
+
     .container {
-      max-width: 1100px;
+      max-width: 95%;
       margin: auto;
       background: #fff;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
+
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      color: #333;
     }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      min-width: 160px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 10px;
     }
-    table thead {
+
+    table th, table td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    table th {
       background-color: #4caf50;
       color: white;
     }
-    table th, table td {
-      padding: 10px;
-      text-align: center;
-      border: 1px solid #ccc;
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      background-color: #1976d2;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
     }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .filters input, .filters select {
-      padding: 8px;
-      font-size: 14px;
+
+    .back-btn:hover {
+      background-color: #135bb2;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Dashboard Data Produksi</h2>
+    <a href="index.html" class="back-btn">← Kembali ke Form</a>
+    <h2>Dashboard Produksi</h2>
+
     <div class="filters">
-      <input type="date" id="filterTanggal">
-      <select id="filterCustomer">
-        <option value="">Pilih Customer</option>
-      </select>
-      <select id="filterPartName">
-        <option value="">Pilih Part Name</option>
-      </select>
-      <select id="filterStatus">
-        <option value="">Pilih Status</option>
-      </select>
+      <input type="date" id="filterTanggal" />
+      <select id="filterCustomer"><option value="">Customer</option></select>
+      <select id="filterPartName"><option value="">Part Name</option></select>
+      <select id="filterStatus"><option value="">Status</option></select>
     </div>
-    <div id="loading">⏳ Memuat data...</div>
-    <table id="dataTable" style="display:none;">
+
+    <table>
       <thead>
         <tr>
           <th>Tanggal</th>
           <th>Customer</th>
           <th>Part Name</th>
-          <th>Part No.</th>
+          <th>Part Number</th>
           <th>Status</th>
           <th>Jumlah</th>
           <th>Satuan</th>
           <th>Departement</th>
-          <th>Timestamp</th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
+      <tbody id="dataTable"></tbody>
     </table>
   </div>
 
   <script>
-    const apiURL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
-    let allData = [];
+    const API_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
 
-    const tableBody = document.getElementById("tableBody");
-    const loadingText = document.getElementById("loading");
-    const dataTable = document.getElementById("dataTable");
-
+    const tableBody = document.getElementById("dataTable");
     const filterTanggal = document.getElementById("filterTanggal");
     const filterCustomer = document.getElementById("filterCustomer");
     const filterPartName = document.getElementById("filterPartName");
     const filterStatus = document.getElementById("filterStatus");
 
+    let data = [];
+
     async function fetchData() {
-      try {
-        const res = await fetch(apiURL);
-        const data = await res.json();
-        allData = data.reverse();
-        populateFilters(allData);
-        renderTable(allData);
-      } catch (error) {
-        loadingText.textContent = "❌ Gagal memuat data.";
-        console.error(error);
-      }
+      const res = await fetch(API_URL);
+      const result = await res.json();
+      data = result;
+      populateFilters(data);
+      displayData(data);
     }
 
     function populateFilters(data) {
       const customers = new Set();
-      const partNames = new Set();
+      const parts = new Set();
       const statuses = new Set();
 
-      data.forEach(item => {
-        if (item.Customer) customers.add(item.Customer);
-        if (item["Part Name"]) partNames.add(item["Part Name"]);
-        if (item.Status) statuses.add(item.Status);
+      data.forEach(row => {
+        if (row["Customer"]) customers.add(row["Customer"]);
+        if (row["Part Name"]) parts.add(row["Part Name"]);
+        if (row["Status"]) statuses.add(row["Status"]);
       });
 
-      for (const val of customers) filterCustomer.innerHTML += `<option value="${val}">${val}</option>`;
-      for (const val of partNames) filterPartName.innerHTML += `<option value="${val}">${val}</option>`;
-      for (const val of statuses) filterStatus.innerHTML += `<option value="${val}">${val}</option>`;
-
-      loadingText.style.display = "none";
-      dataTable.style.display = "table";
+      filterCustomer.innerHTML = '<option value="">Customer</option>' + [...customers].map(c => `<option value="${c}">${c}</option>`).join("");
+      filterPartName.innerHTML = '<option value="">Part Name</option>' + [...parts].map(p => `<option value="${p}">${p}</option>`).join("");
+      filterStatus.innerHTML = '<option value="">Status</option>' + [...statuses].map(s => `<option value="${s}">${s}</option>`).join("");
     }
 
-    function renderTable(data) {
+    function displayData(filteredData) {
       tableBody.innerHTML = "";
-      data.forEach(item => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${item.Tanggal || ''}</td>
-          <td>${item.Customer || ''}</td>
-          <td>${item["Part Name"] || ''}</td>
-          <td>${item["Part Number"] || ''}</td>
-          <td>${item.Status || ''}</td>
-          <td>${item.Jumlah || ''}</td>
-          <td>${item.Satuan || ''}</td>
-          <td>${item.Departement || ''}</td>
-          <td>${item.Timestamp ? new Date(item.Timestamp).toLocaleString() : ''}</td>
+      filteredData.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row["Tanggal"] || ""}</td>
+          <td>${row["Customer"] || ""}</td>
+          <td>${row["Part Name"] || ""}</td>
+          <td>${row["Part Number"] || ""}</td>
+          <td>${row["Status"] || ""}</td>
+          <td>${row["Jumlah"] || ""}</td>
+          <td>${row["Satuan"] || ""}</td>
+          <td>${row["Departement"] || ""}</td>
         `;
-        tableBody.appendChild(row);
+        tableBody.appendChild(tr);
       });
     }
 
     function applyFilters() {
-      const tanggal = filterTanggal.value;
-      const customer = filterCustomer.value;
-      const partName = filterPartName.value;
-      const status = filterStatus.value;
-
-      const filtered = allData.filter(item => {
-        return (
-          (!tanggal || item.Tanggal === tanggal) &&
-          (!customer || item.Customer === customer) &&
-          (!partName || item["Part Name"] === partName) &&
-          (!status || item.Status === status)
-        );
+      const filtered = data.filter(row => {
+        return (!filterTanggal.value || row["Tanggal"] === filterTanggal.value)
+          && (!filterCustomer.value || row["Customer"] === filterCustomer.value)
+          && (!filterPartName.value || row["Part Name"] === filterPartName.value)
+          && (!filterStatus.value || row["Status"] === filterStatus.value);
       });
-
-      renderTable(filtered);
+      displayData(filtered);
     }
 
     filterTanggal.addEventListener("change", applyFilters);
