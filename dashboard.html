@@ -7,35 +7,36 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f8f9fa;
+      background-color: #f1f3f5;
       margin: 0;
       padding: 20px;
     }
 
     h2 {
       text-align: center;
-      color: #333;
+      color: #212529;
+      margin-bottom: 20px;
     }
 
     .dashboard-container {
-      max-width: 95%;
+      max-width: 100%;
       margin: auto;
-      background: #fff;
+      background: #ffffff;
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .button-row {
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
-      margin-bottom: 15px;
       gap: 10px;
+      margin-bottom: 20px;
     }
 
     .button-row a {
-      padding: 8px 14px;
+      padding: 10px 16px;
       background-color: #198754;
       color: white;
       border-radius: 6px;
@@ -50,20 +51,21 @@
 
     .filter-row {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 10px;
     }
 
     .filter-row input,
     .filter-row select,
     .filter-row button {
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 6px;
       border: 1px solid #ced4da;
       font-size: 14px;
     }
 
-    .filter-row input[type="text"] {
+    .filter-row input[type="text"],
+    .filter-row select {
       width: 160px;
     }
 
@@ -78,14 +80,19 @@
       background-color: #0b5ed7;
     }
 
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      min-width: 800px;
     }
 
     th, td {
-      padding: 10px 8px;
+      padding: 10px;
       border: 1px solid #dee2e6;
       text-align: center;
       font-size: 14px;
@@ -93,7 +100,7 @@
 
     th {
       background-color: #e9ecef;
-      color: #333;
+      color: #212529;
     }
 
     .spinner {
@@ -111,13 +118,8 @@
       animation: bounce 0.6s infinite alternate;
     }
 
-    .spinner div:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .spinner div:nth-child(3) {
-      animation-delay: 0.4s;
-    }
+    .spinner div:nth-child(2) { animation-delay: 0.2s; }
+    .spinner div:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes bounce {
       to {
@@ -127,15 +129,21 @@
     }
 
     @media (max-width: 768px) {
-      th, td {
-        font-size: 12px;
-        padding: 6px 4px;
-      }
-
-      .button-row a,
+      .filter-row input,
+      .filter-row select,
       .filter-row button {
         font-size: 12px;
         padding: 6px 10px;
+      }
+
+      .button-row a {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+
+      th, td {
+        font-size: 12px;
+        padding: 8px 6px;
       }
     }
   </style>
@@ -143,11 +151,12 @@
 <body>
   <div class="dashboard-container">
     <h2>Dashboard Data Produksi</h2>
+
     <div class="button-row">
       <a href="index.html">+ Input Data</a>
       <div class="filter-row">
         <input type="date" id="filterTanggal" />
-        <input type="text" id="filterPartName" placeholder="Cari Part Name..." oninput="fetchData()"/>
+        <input type="text" id="filterPartName" placeholder="Cari Part Name..." oninput="fetchData()" />
         <select id="filterStatus" onchange="fetchData()">
           <option value="">-- Semua Status --</option>
           <option value="Material">Material</option>
@@ -165,22 +174,23 @@
       <div></div>
     </div>
 
-    <table id="tabelProduksi" style="display:none;">
-      <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>Tanggal</th>
-          <th>Customer</th>
-          <th>Part Name</th>
-          <th>Part Number</th>
-          <th>Status</th>
-          <th>Jumlah</th>
-          <th>Satuan</th>
-          <th>Departement</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="table-wrapper">
+      <table id="tabelProduksi" style="display:none;">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Customer</th>
+            <th>Part Name</th>
+            <th>Part Number</th>
+            <th>Status</th>
+            <th>Jumlah</th>
+            <th>Satuan</th>
+            <th>Departement</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
@@ -225,15 +235,13 @@
         });
 
         if (filteredData.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9">Tidak ada data ditemukan.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8">Tidak ada data ditemukan.</td></tr>`;
         } else {
           filteredData.forEach(row => {
             const tr = document.createElement("tr");
-            const timestamp = row.Timestamp ? new Date(row.Timestamp).toLocaleString("id-ID") : "";
             const tanggal = !isNaN(row.Tanggal) ? convertExcelDate(Number(row.Tanggal)) : row.Tanggal;
 
             tr.innerHTML = `
-              <td>${timestamp}</td>
               <td>${tanggal}</td>
               <td>${row.Customer || ""}</td>
               <td>${row["Part Name"] || ""}</td>
@@ -251,10 +259,11 @@
         table.style.display = "table";
       } catch (error) {
         console.error("Gagal mengambil data:", error);
-        spinner.textContent = "Gagal mengambil data.";
+        spinner.innerHTML = "<p>Gagal mengambil data.</p>";
       }
     }
 
+    // Set default tanggal hari ini
     document.getElementById("filterTanggal").value = new Date().toISOString().split("T")[0];
     fetchData();
   </script>
