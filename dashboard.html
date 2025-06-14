@@ -28,8 +28,10 @@
 
     .button-row {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
       margin-bottom: 15px;
+      gap: 10px;
     }
 
     .button-row a {
@@ -44,6 +46,36 @@
 
     .button-row a:hover {
       background-color: #146c43;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-row input,
+    .filter-row select,
+    .filter-row button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ced4da;
+      font-size: 14px;
+    }
+
+    .filter-row input[type="text"] {
+      width: 160px;
+    }
+
+    .filter-row button {
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .filter-row button:hover {
+      background-color: #0b5ed7;
     }
 
     table {
@@ -100,7 +132,8 @@
         padding: 6px 4px;
       }
 
-      .button-row a {
+      .button-row a,
+      .filter-row button {
         font-size: 12px;
         padding: 6px 10px;
       }
@@ -112,6 +145,18 @@
     <h2>Dashboard Data Produksi</h2>
     <div class="button-row">
       <a href="index.html">+ Input Data</a>
+      <div class="filter-row">
+        <input type="date" id="filterTanggal" />
+        <input type="text" id="filterPartName" placeholder="Cari Part Name..." oninput="fetchData()"/>
+        <select id="filterStatus" onchange="fetchData()">
+          <option value="">-- Semua Status --</option>
+          <option value="Material">Material</option>
+          <option value="WIP">WIP</option>
+          <option value="Finish Good">Finish Good</option>
+          <option value="NG">NG</option>
+        </select>
+        <button onclick="fetchData()">Terapkan Filter</button>
+      </div>
     </div>
 
     <div class="spinner" id="loadingSpinner">
@@ -141,10 +186,20 @@
   <script>
     const url = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
 
+    function convertExcelDate(serial) {
+      const excelEpoch = new Date(1899, 11, 30);
+      const date = new Date(excelEpoch.getTime() + serial * 86400000);
+      return date.toISOString().split('T')[0];
+    }
+
     async function fetchData() {
       const spinner = document.getElementById("loadingSpinner");
       const table = document.getElementById("tabelProduksi");
       const tbody = table.querySelector("tbody");
+
+      const filterTanggal = document.getElementById("filterTanggal").value || new Date().toISOString().split("T")[0];
+      const filterPartName = document.getElementById("filterPartName").value.toLowerCase();
+      const filterStatus = document.getElementById("filterStatus").value;
 
       spinner.style.display = "flex";
       table.style.display = "none";
@@ -154,25 +209,43 @@
         const response = await fetch(url);
         const data = await response.json();
 
-        data.forEach(row => {
-          const tr = document.createElement("tr");
+        const filteredData = data.filter(row => {
+          let tanggal = row.Tanggal;
+          if (!isNaN(tanggal)) tanggal = convertExcelDate(Number(tanggal));
+          else if (tanggal.includes("/")) {
+            const [d, m, y] = tanggal.split("/");
+            tanggal = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+          }
 
-          // Format timestamp jika ada
-          const timestamp = row.Timestamp ? new Date(row.Timestamp).toLocaleString("id-ID") : "";
+          const matchTanggal = tanggal === filterTanggal;
+          const matchPart = !filterPartName || (row["Part Name"] || "").toLowerCase().includes(filterPartName);
+          const matchStatus = !filterStatus || row.Status === filterStatus;
 
-          tr.innerHTML = `
-            <td>${timestamp}</td>
-            <td>${row.Tanggal || ""}</td>
-            <td>${row.Customer || ""}</td>
-            <td>${row["Part Name"] || ""}</td>
-            <td>${row["Part Number"] || ""}</td>
-            <td>${row.Status || ""}</td>
-            <td>${row.Jumlah || ""}</td>
-            <td>${row.Satuan || ""}</td>
-            <td>${row.Departement || ""}</td>
-          `;
-          tbody.appendChild(tr);
+          return matchTanggal && matchPart && matchStatus;
         });
+
+        if (filteredData.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="9">Tidak ada data ditemukan.</td></tr>`;
+        } else {
+          filteredData.forEach(row => {
+            const tr = document.createElement("tr");
+            const timestamp = row.Timestamp ? new Date(row.Timestamp).toLocaleString("id-ID") : "";
+            const tanggal = !isNaN(row.Tanggal) ? convertExcelDate(Number(row.Tanggal)) : row.Tanggal;
+
+            tr.innerHTML = `
+              <td>${timestamp}</td>
+              <td>${tanggal}</td>
+              <td>${row.Customer || ""}</td>
+              <td>${row["Part Name"] || ""}</td>
+              <td>${row["Part Number"] || ""}</td>
+              <td>${row.Status || ""}</td>
+              <td>${row.Jumlah || ""}</td>
+              <td>${row.Satuan || ""}</td>
+              <td>${row.Departement || ""}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
 
         spinner.style.display = "none";
         table.style.display = "table";
@@ -182,8 +255,8 @@
       }
     }
 
+    document.getElementById("filterTanggal").value = new Date().toISOString().split("T")[0];
     fetchData();
-    setInterval(fetchData, 10000); // refresh setiap 10 detik
   </script>
 </body>
 </html>
