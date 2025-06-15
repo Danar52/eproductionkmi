@@ -375,50 +375,50 @@
     <h2>Input Data Produksi</h2>
     <form id="produksiForm">
       <div class="form-group">
-        <input type="date" name="Tanggal" id="tanggal" readonly required placeholder=" " />
+        <input type="date" name="Tanggal" id="tanggal" readonly required />
         <label for="tanggal">Tanggal</label>
       </div>
 
       <div class="form-group">
-        <select name="Customer" id="customer" required placeholder=" ">
+        <select name="Customer" id="customer" required>
           <option value="" disabled selected>-- Pilih Customer --</option>
         </select>
         <label for="customer">Customer</label>
       </div>
 
       <div class="form-group">
-        <select name="Part Name" id="partName" required placeholder=" ">
+        <select name="Part Name" id="partName" required>
           <option value="" disabled selected>-- Pilih Part --</option>
         </select>
         <label for="partName">Part Name</label>
       </div>
 
       <div class="form-group">
-        <input type="text" name="Part Number" id="partNumber" readonly required placeholder=" " />
+        <input type="text" name="Part Number" id="partNumber" readonly required />
         <label for="partNumber">Part Number</label>
       </div>
 
       <div class="form-group">
-        <select name="Status" id="status" required placeholder=" ">
+        <select name="Status" id="status" required>
           <option value="" disabled selected>-- Pilih Status --</option>
         </select>
         <label for="status">Status</label>
       </div>
 
       <div class="form-group">
-        <input type="number" name="Jumlah" id="jumlah" min="0" required placeholder=" " />
+        <input type="number" name="Jumlah" id="jumlah" min="0" required />
         <label for="jumlah">Jumlah</label>
       </div>
 
       <div class="form-group">
-        <select name="Satuan" id="satuan" required placeholder=" ">
+        <select name="Satuan" id="satuan" required>
           <option value="" disabled selected>-- Pilih Satuan --</option>
         </select>
         <label for="satuan">Satuan</label>
       </div>
 
       <div class="form-group">
-        <select name="Departement" id="departement" required placeholder=" ">
+        <select name="Departement" id="departement" required>
           <option value="" disabled selected>-- Pilih Departement --</option>
         </select>
         <label for="departement">Departement</label>
@@ -430,21 +430,13 @@
       </div>
     </form>
 
-    <!-- New Copyright Section - Moved inside .container -->
     <div class="copyright">
       <p>&copy; 2025 Form Input Produksi. <b>PT. Kenco Manufactur Indonesia</b>.</p>
     </div>
-
   </div>
 
-  <div id="overlay">
-    <div class="spinner"></div>
-  </div>
-
-  <div id="popupNotification" class="popup-notification">
-    <i class="fas fa-check-circle fa-lg"></i>
-    <span></span>
-  </div>
+  <div id="overlay"><div class="spinner"></div></div>
+  <div id="popupNotification" class="popup-notification"><i class="fas fa-check-circle fa-lg"></i> <span></span></div>
 
   <script>
     const form = document.getElementById('produksiForm');
@@ -461,129 +453,85 @@
     const departementEl = document.getElementById("departement");
 
     const API_BASE_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+    const partList = [];
+    let konversiList = [];
 
-    const partList = {};
-
-    // Set today's date automatically
+    // Set tanggal hari ini
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const todayString = `${yyyy}-${mm}-${dd}`;
     tanggalEl.value = todayString;
+    tanggalEl.setAttribute("min", todayString); // Validasi tanggal
 
-    // Helper function to show the top-of-screen popup notification
+    // Notifikasi
     function showPopupNotification(message, type = 'success') {
       const icon = popupNotification.querySelector('i');
       const textSpan = popupNotification.querySelector('span');
-
       textSpan.textContent = message;
-      popupNotification.classList.remove('success', 'error'); // Reset classes
-      popupNotification.classList.add(type); // Add success or error class
-
-      // Set icon based on type
-      if (type === 'success') {
-          icon.className = 'fas fa-check-circle fa-lg';
-      } else if (type === 'error') {
-          icon.className = 'fas fa-times-circle fa-lg';
-      } else { // Default or warning
-          icon.className = 'fas fa-info-circle fa-lg';
-      }
-
-
-      popupNotification.classList.remove('hide');
+      popupNotification.className = `popup-notification ${type}`;
+      icon.className = type === 'error' ? 'fas fa-times-circle fa-lg' : 'fas fa-check-circle fa-lg';
       popupNotification.classList.add('show');
-      setTimeout(() => {
-        popupNotification.classList.remove('show');
-        popupNotification.classList.add('hide');
-      }, 3000);
+      setTimeout(() => popupNotification.classList.remove('show'), 3000);
     }
 
-    // --- Master Data Fetching ---
+    // Fetch master data
     async function fetchMasterData() {
-      try {
-        const [customerRes, partRes, statusRes, satuanRes, departementRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/tabs/CUSTOMER`),
-          fetch(`${API_BASE_URL}/tabs/PART`),
-          fetch(`${API_BASE_URL}/tabs/STATUS`),
-          fetch(`${API_BASE_URL}/tabs/SATUAN`),
-          fetch(`${API_BASE_URL}/tabs/DEPARTEMENT`),
-        ]);
+      const [customerRes, partRes, statusRes, satuanRes, departementRes, konversiRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/tabs/CUSTOMER`),
+        fetch(`${API_BASE_URL}/tabs/PART`),
+        fetch(`${API_BASE_URL}/tabs/STATUS`),
+        fetch(`${API_BASE_URL}/tabs/SATUAN`),
+        fetch(`${API_BASE_URL}/tabs/DEPARTEMENT`),
+        fetch(`${API_BASE_URL}/tabs/KONVERSI`)
+      ]);
 
-        const customerData = await customerRes.json();
-        const partData = await partRes.json();
-        const statusData = await statusRes.json();
-        const satuanData = await satuanRes.json();
-        const departementData = await departementRes.json();
+      const customerData = await customerRes.json();
+      const partData = await partRes.json();
+      const statusData = await statusRes.json();
+      const satuanData = await satuanRes.json();
+      const departementData = await departementRes.json();
+      konversiList = await konversiRes.json();
 
-        customerData.forEach(c => {
-          if (c.Customer) {
-            const opt = document.createElement("option");
-            opt.value = c.Customer;
-            opt.textContent = c.Customer;
-            customerEl.appendChild(opt);
-          }
-        });
+      customerData.forEach(c => {
+        if (c.Customer) {
+          const opt = new Option(c.Customer, c.Customer);
+          customerEl.add(opt);
+        }
+      });
 
-        partData.forEach(p => {
-          if (p.Customer && p["Part Name"] && p["Part No."]) {
-            if (!partList[p.Customer]) partList[p.Customer] = [];
-            partList[p.Customer].push({ name: p["Part Name"], number: p["Part No."] });
-          }
-        });
+      partData.forEach(p => {
+        if (p.Customer && p["Part Name"] && p["Part No."]) {
+          if (!partList[p.Customer]) partList[p.Customer] = [];
+          partList[p.Customer].push({ name: p["Part Name"], number: p["Part No."] });
+        }
+      });
 
-        statusData.forEach(s => {
-          if (s.Status) {
-            const opt = document.createElement("option");
-            opt.value = s.Status;
-            opt.textContent = s.Status;
-            statusEl.appendChild(opt);
-          }
-        });
+      statusData.forEach(s => {
+        if (s.Status) statusEl.add(new Option(s.Status, s.Status));
+      });
 
-        satuanData.forEach(s => {
-          if (s.Satuan) {
-            const opt = document.createElement("option");
-            opt.value = s.Satuan;
-            opt.textContent = s.Satuan;
-            satuanEl.appendChild(opt);
-          }
-        });
+      satuanData.forEach(s => {
+        if (s.Satuan) satuanEl.add(new Option(s.Satuan, s.Satuan));
+      });
 
-        departementData.forEach(d => {
-          if (d.Departement) {
-            const opt = document.createElement("option");
-            opt.value = d.Departement;
-            opt.textContent = d.Departement;
-            departementEl.appendChild(opt);
-          }
-        });
-      } catch (err) {
-        console.error("Failed to fetch master data:", err);
-        showPopupNotification("Gagal memuat data master. Coba refresh halaman.", "error");
-      }
+      departementData.forEach(d => {
+        if (d.Departement) departementEl.add(new Option(d.Departement, d.Departement));
+      });
     }
 
     fetchMasterData();
 
-    // --- Event Listeners for Dynamic Form Fields ---
-
     customerEl.addEventListener("change", () => {
-      const selectedCustomer = customerEl.value;
-      partNameEl.innerHTML = '<option value="" disabled selected>-- Pilih Part --</option>'; // Reset Part Name
-      partNumberEl.value = ""; // Clear Part Number
-
-      if (selectedCustomer && partList[selectedCustomer]) {
-        const sortedParts = partList[selectedCustomer].sort((a, b) => a.name.localeCompare(b.name));
-        sortedParts.forEach(part => {
-          const opt = document.createElement("option");
-          opt.value = part.name;
-          opt.textContent = part.name;
-          partNameEl.appendChild(opt);
+      const selected = customerEl.value;
+      partNameEl.innerHTML = '<option value="" disabled selected>-- Pilih Part --</option>';
+      partNumberEl.value = "";
+      if (partList[selected]) {
+        partList[selected].sort((a, b) => a.name.localeCompare(b.name)).forEach(part => {
+          partNameEl.add(new Option(part.name, part.name));
         });
       }
-      // Trigger validation/floating label for partNameEl if customer selected
-      partNameEl.dispatchEvent(new Event('change'));
     });
 
     partNameEl.addEventListener("change", () => {
@@ -591,19 +539,36 @@
       const selectedPartName = partNameEl.value;
       const part = partList[selectedCustomer]?.find(p => p.name === selectedPartName);
       partNumberEl.value = part ? part.number : "";
-      // Trigger validation/floating label for partNumberEl
-      partNumberEl.dispatchEvent(new Event('change'));
     });
 
-    // --- Form Submission ---
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
-      overlay.classList.add("show"); // Show loading overlay
+      overlay.classList.add("show");
 
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
       data.Timestamp = new Date().toISOString();
+
+      // Konversi otomatis ke PCS
+      if (data.Status === "MATERIAL" && (data.Satuan === "SHEET" || data.Satuan === "KG")) {
+        const konversi = konversiList.find(k =>
+          k["Customer"] === data.Customer &&
+          k["Part Name"] === data["Part Name"] &&
+          k["Satuan"] === data.Satuan
+        );
+
+        if (konversi && konversi["Konversi per PCS"]) {
+          const jumlah = parseFloat(data.Jumlah);
+          const konversiValue = parseFloat(konversi["Konversi per PCS"]);
+          data["Konversi PCS"] = Math.round(jumlah * konversiValue);
+        } else {
+          overlay.classList.remove("show");
+          showPopupNotification("Data konversi tidak ditemukan!", "error");
+          return;
+        }
+      } else {
+        data["Konversi PCS"] = "";
+      }
 
       try {
         const res = await fetch(API_BASE_URL, {
@@ -616,62 +581,15 @@
           showPopupNotification("Data berhasil dikirim!", "success");
           form.reset();
           tanggalEl.value = todayString;
-          // Manually reset dropdowns and trigger change to reset dependent fields/labels
-          customerEl.value = "";
-          customerEl.dispatchEvent(new Event('change')); // Trigger customer change to reset partName/partNumber
-          statusEl.value = "";
-          satuanEl.value = "";
-          departementEl.value = "";
-          // To ensure labels float correctly for new empty state after reset:
-          document.querySelectorAll('input, select').forEach(input => {
-            input.dispatchEvent(new Event('change'));
-            input.dispatchEvent(new Event('blur'));
-          });
-
         } else {
-          const errorData = await res.json();
-          console.error("Failed to submit data:", errorData);
-          showPopupNotification(`Gagal mengirim data. Error: ${errorData.message || res.statusText}`, "error");
+          showPopupNotification("Gagal mengirim data.", "error");
         }
       } catch (err) {
-        console.error("Submission error:", err);
-        showPopupNotification("Terjadi kesalahan jaringan. Coba lagi.", "error");
+        showPopupNotification("Terjadi kesalahan jaringan.", "error");
       } finally {
-        overlay.classList.remove("show"); // Hide loading overlay
+        overlay.classList.remove("show");
       }
     });
-
-    // Add event listeners for floating label effect on page load/reset
-    document.querySelectorAll('input, select').forEach(input => {
-      // For initial load, check if fields have values (e.g., readonly date)
-      // or if it's a select with a selected option that isn't the disabled one
-      if (input.value !== '' && input.value !== '-- Pilih Customer --' && input.value !== '-- Pilih Part --' && input.value !== '-- Pilih Status --' && input.value !== '-- Pilih Satuan --' && input.value !== '-- Pilih Departement --') {
-        input.classList.add('has-value');
-      }
-      input.addEventListener('focus', () => input.classList.add('has-focus'));
-      input.addEventListener('blur', () => {
-        input.classList.remove('has-focus');
-        // Check if value is truly empty or if it's the disabled placeholder option
-        const isSelectPlaceholder = input.tagName === 'SELECT' && input.value === '';
-        if (input.value === '' || isSelectPlaceholder) {
-            input.classList.remove('has-value');
-        } else {
-            input.classList.add('has-value');
-        }
-      });
-      input.addEventListener('change', () => {
-          const isSelectPlaceholder = input.tagName === 'SELECT' && input.value === '';
-          if (input.value === '' || isSelectPlaceholder) {
-            input.classList.remove('has-value');
-          } else {
-            input.classList.add('has-value');
-          }
-      });
-    });
-
-    // Manually trigger change event for date field on load to activate its label
-    tanggalEl.dispatchEvent(new Event('change'));
-
   </script>
 </body>
 </html>
