@@ -289,22 +289,27 @@
 
     @media (max-width: 600px) {
       .container {
-        padding: 25px;
-        margin: 15px;
-        box-shadow: var(--shadow-elevation-1); /* Lighter shadow on small screens */
+        padding: 20px;
+        margin: 10px;
+        box-shadow: var(--shadow-elevation-1);
       }
 
       h2 {
-        font-size: 1.5rem;
-        margin-bottom: 25px;
-      }
-
-      .form-group {
+        font-size: 1.4rem;
         margin-bottom: 20px;
       }
 
-      label {
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      input, select {
+        padding: 10px;
         font-size: 0.9rem;
+      }
+
+      label {
+        font-size: 0.85rem;
         top: 12px;
       }
 
@@ -312,43 +317,33 @@
       select:focus + label,
       input:not(:placeholder-shown) + label,
       select:not(:placeholder-shown) + label,
-      input.has-value + label, /* Added for pre-filled or readonly fields */
-      select.has-value + label { /* Added for pre-filled or readonly fields */
+      input.has-value + label,
+      select.has-value + label {
         top: -8px;
         left: 8px;
-        font-size: 0.75rem;
-      }
-
-      input, select {
-        padding: 12px;
-        font-size: 0.95rem;
-      }
-
-      select {
-        background-position: right 12px center;
-        padding-right: 35px;
+        font-size: 0.7rem;
       }
 
       .button-group {
         flex-direction: column;
-        gap: 12px;
-        margin-top: 25px;
+        gap: 10px;
+        margin-top: 20px;
       }
 
       .button-group button,
       .button-group a {
-        padding: 12px 15px;
-        font-size: 0.95rem;
+        padding: 10px 15px;
+        font-size: 0.9rem;
       }
 
       .button-group i {
-        margin-right: 8px;
+        margin-right: 6px;
       }
 
       .spinner {
-        width: 50px;
-        height: 50px;
-        border-width: 6px;
+        width: 40px;
+        height: 40px;
+        border-width: 5px;
       }
     }
 
@@ -427,6 +422,11 @@
         <label for="departement">Departement</label>
       </div>
 
+      <div class="form-group" id="keteranganNgGroup" style="display:none;">
+        <input type="text" name="Keterangan NG" id="keteranganNg" placeholder=" ">
+        <label for="keteranganNg">Keterangan NG</label>
+      </div>
+
       <div class="button-group">
         <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Kirim Data</button>
         <a href="dashboard.html" class="dashboard-btn"><i class="fas fa-chart-line"></i> Lihat Dashboard</a>
@@ -495,6 +495,14 @@
     const departementData = await departementRes.json();
     konversiList = await konversiRes.json();
 
+    // Simpan semua satuan untuk backup jika status tidak cocok
+    const satuanSet = new Set();
+    satuanData.forEach(s => {
+      if (s.Satuan) satuanSet.add(s.Satuan);
+    });
+    const satuanMasterList = Array.from(satuanSet);
+    window.satuanMasterList = satuanMasterList;
+
     customerData.forEach(c => {
       if (c.Customer) customerEl.add(new Option(c.Customer, c.Customer));
     });
@@ -520,6 +528,41 @@
   }
 
   fetchMasterData();
+  // Filter opsi satuan berdasarkan status
+  statusEl.addEventListener("change", () => {
+    const selectedStatus = statusEl.value;
+    satuanEl.innerHTML = '<option value="" disabled selected>-- Pilih Satuan --</option>';
+
+    const opsiMaterial = ["SHEET", "KG", "PCS"];
+    const opsiWIPFinishGood = ["PCS", "SET"];
+    const opsiNG = ["SHEET", "KG", "PCS", "SET"];
+
+    let filteredOptions = [];
+
+    if (["MATERIAL"].includes(selectedStatus)) {
+      filteredOptions = opsiMaterial;
+    } else if (["WIP", "FINISH GOOD"].includes(selectedStatus)) {
+      filteredOptions = opsiWIPFinishGood;
+    } else if (["NG"].includes(selectedStatus)) {
+      filteredOptions = opsiNG;
+    } else {
+      // Default ke semua satuan jika status tidak sesuai
+      filteredOptions = window.satuanMasterList || [];
+    }
+
+    filteredOptions.forEach(satuan => {
+      satuanEl.add(new Option(satuan, satuan));
+    });
+
+    // Keterangan NG input visibility logic
+    const keteranganNgGroup = document.getElementById("keteranganNgGroup");
+    if (selectedStatus === "NG") {
+      keteranganNgGroup.style.display = "block";
+    } else {
+      keteranganNgGroup.style.display = "none";
+      document.getElementById("keteranganNg").value = "";
+    }
+  });
 
   customerEl.addEventListener("change", () => {
     const selected = customerEl.value;
@@ -548,6 +591,13 @@
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
     data.Timestamp = new Date().toISOString();
+
+    // Validasi Keterangan NG jika status NG
+    if (data.Status === "NG" && (!data["Keterangan NG"] || data["Keterangan NG"].trim() === "")) {
+      showPopupNotification("Keterangan NG wajib diisi!", "error");
+      overlay.classList.remove("show");
+      return;
+    }
 
     // Validasi jumlah
     if (!data.Jumlah || isNaN(data.Jumlah) || parseFloat(data.Jumlah) <= 0) {
