@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Form Input Produksi</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     :root {
@@ -31,7 +31,7 @@
     }
 
     body {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: var(--bg-light);
       display: flex;
       justify-content: center;
@@ -59,7 +59,7 @@
       text-align: center;
       margin-bottom: 35px;
       color: var(--primary-accent);
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 700;
     }
 
@@ -79,6 +79,8 @@
       background-color: var(--card-bg); /* To cover input border when "floating" */
       padding: 0 5px;
       z-index: 1;
+      font-weight: 500;
+      letter-spacing: 0.3px;
     }
 
     input:focus + label,
@@ -151,6 +153,7 @@
       align-items: center;
       justify-content: center;
       box-shadow: var(--shadow-elevation-1);
+      font-family: 'Poppins', sans-serif;
     }
 
     .button-group i {
@@ -439,157 +442,169 @@
   <div id="popupNotification" class="popup-notification"><i class="fas fa-check-circle fa-lg"></i> <span></span></div>
 
   <script>
-    const form = document.getElementById('produksiForm');
-    const overlay = document.getElementById('overlay');
-    const popupNotification = document.getElementById('popupNotification');
+  const form = document.getElementById('produksiForm');
+  const overlay = document.getElementById('overlay');
+  const popupNotification = document.getElementById('popupNotification');
 
-    const tanggalEl = document.getElementById("tanggal");
-    const customerEl = document.getElementById("customer");
-    const partNameEl = document.getElementById("partName");
-    const partNumberEl = document.getElementById("partNumber");
-    const statusEl = document.getElementById("status");
-    const jumlahEl = document.getElementById("jumlah");
-    const satuanEl = document.getElementById("satuan");
-    const departementEl = document.getElementById("departement");
+  const tanggalEl = document.getElementById("tanggal");
+  const customerEl = document.getElementById("customer");
+  const partNameEl = document.getElementById("partName");
+  const partNumberEl = document.getElementById("partNumber");
+  const statusEl = document.getElementById("status");
+  const jumlahEl = document.getElementById("jumlah");
+  const satuanEl = document.getElementById("satuan");
+  const departementEl = document.getElementById("departement");
 
-    const API_BASE_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
-    const partList = [];
-    let konversiList = [];
+  const API_BASE_URL = "https://api.sheetbest.com/sheets/5c874fef-f659-4e32-aa02-8bef8583f249";
+  const partList = {};
+  let konversiList = [];
 
-    // Set tanggal hari ini
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const todayString = `${yyyy}-${mm}-${dd}`;
-    tanggalEl.value = todayString;
-    tanggalEl.setAttribute("min", todayString); // Validasi tanggal
+  // Set tanggal hari ini
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayString = `${yyyy}-${mm}-${dd}`;
+  tanggalEl.value = todayString;
+  tanggalEl.setAttribute("min", todayString);
 
-    // Notifikasi
-    function showPopupNotification(message, type = 'success') {
-      const icon = popupNotification.querySelector('i');
-      const textSpan = popupNotification.querySelector('span');
-      textSpan.textContent = message;
-      popupNotification.className = `popup-notification ${type}`;
-      icon.className = type === 'error' ? 'fas fa-times-circle fa-lg' : 'fas fa-check-circle fa-lg';
-      popupNotification.classList.add('show');
-      setTimeout(() => popupNotification.classList.remove('show'), 3000);
-    }
+  function showPopupNotification(message, type = 'success') {
+    const icon = popupNotification.querySelector('i');
+    const textSpan = popupNotification.querySelector('span');
+    textSpan.textContent = message;
+    popupNotification.className = `popup-notification ${type}`;
+    icon.className = type === 'error' ? 'fas fa-times-circle fa-lg' : 'fas fa-check-circle fa-lg';
+    popupNotification.classList.add('show');
+    setTimeout(() => popupNotification.classList.remove('show'), 3000);
+  }
 
-    // Fetch master data
-    async function fetchMasterData() {
-      const [customerRes, partRes, statusRes, satuanRes, departementRes, konversiRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/tabs/CUSTOMER`),
-        fetch(`${API_BASE_URL}/tabs/PART`),
-        fetch(`${API_BASE_URL}/tabs/STATUS`),
-        fetch(`${API_BASE_URL}/tabs/SATUAN`),
-        fetch(`${API_BASE_URL}/tabs/DEPARTEMENT`),
-        fetch(`${API_BASE_URL}/tabs/KONVERSI`)
-      ]);
+  async function fetchMasterData() {
+    const [customerRes, partRes, statusRes, satuanRes, departementRes, konversiRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/tabs/CUSTOMER`),
+      fetch(`${API_BASE_URL}/tabs/PART`),
+      fetch(`${API_BASE_URL}/tabs/STATUS`),
+      fetch(`${API_BASE_URL}/tabs/SATUAN`),
+      fetch(`${API_BASE_URL}/tabs/DEPARTEMENT`),
+      fetch(`${API_BASE_URL}/tabs/KONVERSI`)
+    ]);
 
-      const customerData = await customerRes.json();
-      const partData = await partRes.json();
-      const statusData = await statusRes.json();
-      const satuanData = await satuanRes.json();
-      const departementData = await departementRes.json();
-      konversiList = await konversiRes.json();
+    const customerData = await customerRes.json();
+    const partData = await partRes.json();
+    const statusData = await statusRes.json();
+    const satuanData = await satuanRes.json();
+    const departementData = await departementRes.json();
+    konversiList = await konversiRes.json();
 
-      customerData.forEach(c => {
-        if (c.Customer) {
-          const opt = new Option(c.Customer, c.Customer);
-          customerEl.add(opt);
-        }
-      });
+    customerData.forEach(c => {
+      if (c.Customer) customerEl.add(new Option(c.Customer, c.Customer));
+    });
 
-      partData.forEach(p => {
-        if (p.Customer && p["Part Name"] && p["Part No."]) {
-          if (!partList[p.Customer]) partList[p.Customer] = [];
-          partList[p.Customer].push({ name: p["Part Name"], number: p["Part No."] });
-        }
-      });
-
-      statusData.forEach(s => {
-        if (s.Status) statusEl.add(new Option(s.Status, s.Status));
-      });
-
-      satuanData.forEach(s => {
-        if (s.Satuan) satuanEl.add(new Option(s.Satuan, s.Satuan));
-      });
-
-      departementData.forEach(d => {
-        if (d.Departement) departementEl.add(new Option(d.Departement, d.Departement));
-      });
-    }
-
-    fetchMasterData();
-
-    customerEl.addEventListener("change", () => {
-      const selected = customerEl.value;
-      partNameEl.innerHTML = '<option value="" disabled selected>-- Pilih Part --</option>';
-      partNumberEl.value = "";
-      if (partList[selected]) {
-        partList[selected].sort((a, b) => a.name.localeCompare(b.name)).forEach(part => {
-          partNameEl.add(new Option(part.name, part.name));
-        });
+    partData.forEach(p => {
+      if (p.Customer && p["Part Name"] && p["Part No."]) {
+        if (!partList[p.Customer]) partList[p.Customer] = [];
+        partList[p.Customer].push({ name: p["Part Name"], number: p["Part No."] });
       }
     });
 
-    partNameEl.addEventListener("change", () => {
-      const selectedCustomer = customerEl.value;
-      const selectedPartName = partNameEl.value;
-      const part = partList[selectedCustomer]?.find(p => p.name === selectedPartName);
-      partNumberEl.value = part ? part.number : "";
+    statusData.forEach(s => {
+      if (s.Status) statusEl.add(new Option(s.Status, s.Status));
     });
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      overlay.classList.add("show");
+    satuanData.forEach(s => {
+      if (s.Satuan) satuanEl.add(new Option(s.Satuan, s.Satuan));
+    });
 
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      data.Timestamp = new Date().toISOString();
+    departementData.forEach(d => {
+      if (d.Departement) departementEl.add(new Option(d.Departement, d.Departement));
+    });
+  }
 
-      // Konversi otomatis ke PCS
-      if (data.Status === "MATERIAL" && (data.Satuan === "SHEET" || data.Satuan === "KG")) {
-        const konversi = konversiList.find(k =>
-          k["Customer"] === data.Customer &&
-          k["Part Name"] === data["Part Name"] &&
-          k["Satuan"] === data.Satuan
-        );
+  fetchMasterData();
 
-        if (konversi && konversi["Konversi per PCS"]) {
-          const jumlah = parseFloat(data.Jumlah);
-          const konversiValue = parseFloat(konversi["Konversi per PCS"]);
-          data["Konversi PCS"] = Math.round(jumlah * konversiValue);
+  customerEl.addEventListener("change", () => {
+    const selected = customerEl.value;
+    partNameEl.innerHTML = '<option value="" disabled selected>-- Pilih Part --</option>';
+    partNumberEl.value = "";
+    if (partList[selected]) {
+      partList[selected]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach(part => {
+          partNameEl.add(new Option(part.name, part.name));
+        });
+    }
+  });
+
+  partNameEl.addEventListener("change", () => {
+    const selectedCustomer = customerEl.value;
+    const selectedPartName = partNameEl.value;
+    const part = partList[selectedCustomer]?.find(p => p.name === selectedPartName);
+    partNumberEl.value = part ? part.number : "";
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    overlay.classList.add("show");
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    data.Timestamp = new Date().toISOString();
+
+    // Validasi jumlah
+    if (!data.Jumlah || isNaN(data.Jumlah) || parseFloat(data.Jumlah) <= 0) {
+      showPopupNotification("Jumlah tidak valid!", "error");
+      overlay.classList.remove("show");
+      return;
+    }
+
+    // Konversi jika MATERIAL dan satuan SHEET/KG
+    if (data.Status === "MATERIAL" && (data.Satuan === "SHEET" || data.Satuan === "KG")) {
+      const konversi = konversiList.find(k =>
+        k["Customer"] === data.Customer &&
+        k["Part Name"] === data["Part Name"] &&
+        k["Satuan"] === data.Satuan
+      );
+
+      if (konversi && konversi["Konversi Per PCS"]) {
+        const konversiPerPCS = parseFloat(konversi["Konversi Per PCS"]);
+        if (!isNaN(konversiPerPCS)) {
+          data["Konversi PCS"] = Math.round(parseFloat(data.Jumlah) * konversiPerPCS);
         } else {
+          showPopupNotification("Nilai konversi tidak valid!", "error");
           overlay.classList.remove("show");
-          showPopupNotification("Data konversi tidak ditemukan!", "error");
           return;
         }
       } else {
-        data["Konversi PCS"] = "";
-      }
-
-      try {
-        const res = await fetch(API_BASE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-
-        if (res.ok) {
-          showPopupNotification("Data berhasil dikirim!", "success");
-          form.reset();
-          tanggalEl.value = todayString;
-        } else {
-          showPopupNotification("Gagal mengirim data.", "error");
-        }
-      } catch (err) {
-        showPopupNotification("Terjadi kesalahan jaringan.", "error");
-      } finally {
+        showPopupNotification("Data konversi tidak ditemukan!", "error");
         overlay.classList.remove("show");
+        return;
       }
-    });
-  </script>
+    } else {
+      data["Konversi PCS"] = "";
+    }
+
+    // Debug: Lihat data yang akan dikirim
+    console.log("DATA:", data);
+
+    try {
+      const res = await fetch(API_BASE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        showPopupNotification("Data berhasil dikirim!", "success");
+        form.reset();
+        tanggalEl.value = todayString;
+      } else {
+        showPopupNotification("Gagal mengirim data.", "error");
+      }
+    } catch (err) {
+      showPopupNotification("Terjadi kesalahan jaringan.", "error");
+    } finally {
+      overlay.classList.remove("show");
+    }
+  });
+</script>
 </body>
 </html>
